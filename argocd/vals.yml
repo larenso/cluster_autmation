@@ -1,0 +1,55 @@
+createClusterRoles: false
+
+redis-ha:
+  enabled: false
+redis:
+  enabled: false
+redisSecretInit:
+  enabled: false
+externalRedis:
+  host: valkey.valkey.svc.cluster.local
+  existingSecret: valkey
+
+controller:
+  replicas: 1
+
+server:
+  autoscaling:
+    enabled: false
+  service:
+    type: NodePort
+
+repoServer:
+  autoscaling:
+    enabled: false
+
+global:
+  domain: 192.168.4.2
+  logging:
+    format: json
+  securityContext:
+   runAsUser: 1099
+   runAsGroup: 1099
+   fsGroup: 1099
+  networkPolicy:
+    create: true
+  params:
+    application.namespaces: "valkey"
+  affinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: wloads
+            operator: In
+            values:
+            - pi
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: wloads
+            operator: In
+            values:
+            - pi

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pichart.fullname" . }}
+  labels:
+    {{- include "pichart.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  {{- range .Values.service.ports }}
+  {{- toYaml (list .) | nindent 2 }}
+    {{- if not .protocol }}
+    protocol: TCP
+    {{- end }}
+  {{- end }}
+  selector:
+    {{- include "pichart.selectorLabels" . | nindent 4 }}

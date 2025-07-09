@@ -1,0 +1,86 @@
+nameOverride: valkey
+fullnameOverride: valkey
+
+image:
+  repository: valkey/valkey
+  tag: 8.1.2-alpine3.22
+
+service:
+  ports:
+    - port: 6379
+      name: default
+
+args: 
+  - "valkey-server"
+  - "/etc/valkey/valkey.conf"
+livenessProbe:
+  exec:
+    command:
+    - redis-cli
+    - -a 
+    - default
+    - ping
+  initialDelaySeconds: 10
+  periodSeconds: 5
+readinessProbe:
+  exec:
+    command:
+    - redis-cli
+    - -a 
+    - default
+    - ping
+  initialDelaySeconds: 5
+  periodSeconds: 5
+resources:
+  requests:
+    cpu: 100m
+    memory: 200Mi
+volumeMounts:
+  - mountPath: "/etc/valkey/"
+    name: valkey-vol
+    readOnly: true
+sidecars:
+  redis-exporter:
+    image: oliver006/redis_exporter
+    tag: v1.74.0-alpine
+    params:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      ports:
+        - containerPort: 9121
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 9121
+        initialDelaySeconds: 10
+        periodSeconds: 60
+      args: 
+        - "-redis.password-file=/etc/valkey/auth.json"
+        - "--redis.user=monitoring"
+        - "-debug"
+      volumeMounts:
+      - mountPath: "/etc/valkey/"
+        name: valkey-exporter-vol
+        readOnly: true
+
+volumes:
+  - name: valkey-vol
+    secret:
+      secretName: valkey
+  - name: valkey-exporter-vol
+    secret:
+      secretName: valkey-exporter
+
+terminationGracePeriodSeconds: 20
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: wloads
+            operator: In
+            values:
+            - pi
