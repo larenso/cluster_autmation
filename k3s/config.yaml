@@ -1,0 +1,22 @@
+flannel-backend: none
+disable:
+  - traefik
+  - servicelb
+  - metrics-server
+# disable-cloud-controller: true
+disable-network-policy: true
+disable-kube-proxy: true
+secrets-encryption: true
+default-local-storage-path: /mnt/data/k3storage
+
+node-label:
+  - "node.io/role=core"
+cluster-cidr: 
+  - 10.100.0.0/16
+  # - 2a02:ed02:a201:4e00:d1ce::0/112
+service-cidr: 
+  - 10.101.0.0/16
+  # - 2a02:ed02:a201:4e00:d1ce::1:0/112
+kube-controller-manager-arg:
+  - node-cidr-mask-size-ipv4=20
+#   - node-cidr-mask-size-ipv6=120

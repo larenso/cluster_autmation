@@ -1,0 +1,51 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt
+  namespace: cilium
+  labels:
+    app.kubernetes.io/component: porkbun
+    app.kubernetes.io/part-of: cluster
+    app.kubernetes.io/managed-by: yaml
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: larensolarsuss@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-key
+    solvers:
+      - selector:
+          dnsZones:
+            - ebapeka.top
+        dns01:
+          webhook:
+            groupName: porkbun
+            solverName: porkbun
+            config:
+              namespace: cert-manager
+              apiKeySecretRef:
+                name: porkbun-key
+                key: api-key
+              secretKeySecretRef:
+                name: porkbun-key
+                key: secret-key
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: public-cert
+  namespace: cilium
+  labels:
+    app.kubernetes.io/component: cilium
+    app.kubernetes.io/part-of: cluster
+    app.kubernetes.io/managed-by: yaml
+spec:
+  secretName: public-cert-tls
+  issuerRef:
+    kind: Issuer
+    name: letsencrypt
+  privateKey:
+    rotationPolicy: "Always"
+  renewBefore: 360h # 15d
+  dnsNames:
+    - "*.ebapeka.top"

@@ -1,0 +1,441 @@
+commonLabels: {}
+cleanPrometheusOperatorObjectNames: true
+
+crds:
+  enabled: true
+
+kubernetesServiceMonitors:
+  enabled: true
+kubeApiServer:
+  enabled: false
+kubelet:
+  enabled: true
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: true
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeStateMetrics:
+  enabled: true
+
+defaultRules:
+  rules:
+    alertmanager: true
+    etcd: false
+    configReloaders: true
+    general: true
+    k8sContainerCpuUsageSecondsTotal: true
+    k8sContainerMemoryCache: true
+    k8sContainerMemoryRss: true
+    k8sContainerMemorySwap: true
+    k8sContainerResource: true
+    k8sContainerMemoryWorkingSetBytes: true
+    k8sPodOwner: true
+    kubeApiserverAvailability: false
+    kubeApiserverBurnrate: false
+    kubeApiserverHistogram: false
+    kubeApiserverSlos: false
+    kubeControllerManager: false
+    kubelet: true
+    kubeProxy: false
+    kubePrometheusGeneral: true
+    kubePrometheusNodeRecording: false
+    kubernetesApps: true
+    kubernetesResources: true
+    kubernetesStorage: true
+    kubernetesSystem: true
+    kubeSchedulerAlerting: false
+    kubeSchedulerRecording: false
+    kubeStateMetrics: true
+    network: false
+    node: false
+    nodeExporterAlerting: false
+    nodeExporterRecording: false
+    prometheus: true
+    prometheusOperator: true
+    windows: false
+
+global:
+  rbac:
+    create: true
+    createAggregateClusterRoles: true
+
+# disable nodeexporter (1 worker)
+nodeExporter:
+  enabled: false
+
+kube-state-metrics:
+  collectors:
+  - certificatesigningrequests
+  - configmaps
+  - cronjobs
+  - daemonsets
+  - deployments
+  - endpointslices
+  - horizontalpodautoscalers
+  - ingresses
+  - jobs
+  - leases
+  - limitranges
+  - mutatingwebhookconfigurations
+  - namespaces
+  - networkpolicies
+  - nodes
+  - persistentvolumeclaims
+  - persistentvolumes
+  - poddisruptionbudgets
+  - pods
+  - replicasets
+  - replicationcontrollers
+  - resourcequotas
+  - secrets
+  - services
+  - statefulsets
+  - storageclasses
+  - validatingwebhookconfigurations
+  - volumeattachments
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 10m
+      memory: 64Mi
+
+alertmanager:
+  enabled: true
+
+  networkPolicy:
+    enabled: false
+
+  alertmanagerSpec:
+    paused: false
+    replicas: 1
+
+    logFormat: json
+    logLevel: info
+
+    web: {}
+
+    securityContext:
+      runAsGroup: 50004
+      runAsUser: 50004
+      fsGroup: 50004
+
+    affinity: 
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node.io/role
+                operator: In
+                values:
+                - core
+
+
+    retention: 24h
+
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Delete
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
+    resources:
+      limits:
+        cpu: 200m
+        memory: 64Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
+
+
+grafana:
+  enabled: true
+  prune: false
+  replicas: 1
+  revisionHistoryLimit: 2
+
+  defaultDashboardsEnabled: true
+  operator:
+    dashboardsConfigMapRefEnabled: false
+
+  networkPolicy:
+    enabled: false
+
+  # persistent volumes related
+  initChownData:
+    enabled: false
+  sidecar:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 128Mi
+    # skipTlsVerify: true
+    dashboards:
+      enabled: true
+      env: {
+        REQ_SKIP_TLS_VERIFY: true
+      }
+      resource: configmap
+      reloadURL: "https://localhost:3000/api/admin/provisioning/dashboards/reload"
+    datasources:
+      enabled: false
+      
+  defaultDashboardsTimezone: CET
+  defaultDashboardsInterval: 5m
+
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: "Prometheus"
+        type: prometheus
+        uid: prometheus
+        url: http://kube-prometheus-stack-prometheus.monitoring:9090/
+        access: proxy
+        isDefault: true
+        jsonData:
+          httpMethod: POST
+          timeInterval: 30s
+      - name: "Alertmanager"
+        type: alertmanager
+        uid: alertmanager
+        url: http://kube-prometheus-stack-alertmanager.monitoring:9093/
+        access: proxy
+        jsonData:
+          handleGrafanaManagedAlerts: false
+          implementation: prometheus
+      deleteDatasources: []
+
+  serviceAccount:
+    create: true
+    autoMount: false
+
+  testFramework:
+    enabled: false
+
+  serviceMonitor:
+    enabled: true
+    scheme: https
+    tlsConfig:
+      insecureSkipVerify: true 
+
+  securityContext:
+    runAsUser: 50005
+    runAsGroup: 50005
+    fsGroup: 50005
+
+  adminUser: ""
+  adminPassword: ""
+  admin:
+    existingSecret: grafana-secret
+    userKey: admin-user
+    passwordKey: admin-password
+
+  extraSecretMounts:
+  - name: grafana-tls
+    mountPath: /tls/
+    secretName: grafana-tls
+    readOnly: true
+
+  grafana.ini:
+    log:
+      mode: console
+    analytics:
+      check_for_updates: false
+    server:
+      cert_key: /tls/tls.key
+      cert_file: /tls/tls.crt
+      protocol: https
+
+
+  readinessProbe:
+    httpGet:
+      scheme: HTTPS
+
+  livenessProbe:
+    httpGet:
+      scheme: HTTPS
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node.io/role
+              operator: In
+              values:
+              - core
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 128Mi
+
+prometheusOperator:
+  enabled: true
+  revisionHistoryLimit: 2
+  admissionWebhooks:
+    deployment:
+      enabled: false
+    patch:
+      enabled: false
+    certManager:
+      enabled: true
+      rootCert:
+        duration: 43800h # 5y
+      admissionCert:
+        duration: 8760h # 1y
+      issuerRef:
+        name: cluster-private
+        group: cert-manager.io
+        kind: ClusterIssuer
+        
+  # todo ???
+  namespaces: {}
+    # releaseNamespace: true
+    # additional:
+    # - kube-system
+  denyNamespaces: []
+  alertmanagerInstanceNamespaces: []
+  alertmanagerConfigNamespaces: []
+  prometheusInstanceNamespaces: []
+
+  networkPolicy:
+    enabled: false
+
+  kubeletService:
+    enabled: true
+    namespace: kube-system
+  
+  kubeletEndpointsEnabled: false
+  kubeletEndpointSliceEnabled: true
+
+  securityContext:
+    fsGroup: 65534
+    runAsGroup: 65534
+    runAsUser: 65534
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node.io/role
+              operator: In
+              values:
+              - core
+
+  resources:
+    limits:
+      cpu: 100m
+      memory: 32Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+  prometheusConfigReloader:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 32Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
+
+prometheus:
+  enabled: true
+
+  networkPolicy:
+    enabled: false
+
+  prometheusSpec:
+    paused: false
+    replicas: 1
+    shards: 1
+
+    web: {}
+    serviceDiscoveryRole: "EndpointSlice"
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+    # ref: https://prometheus.io/docs/prometheus/latest/feature_flags/
+    enableFeatures:
+    - promql-duration-expr
+    - native-histograms
+    - created-timestamp-zero-ingestion
+    - exemplar-storage
+    # - otlp-native-delta-ingestion
+    # - otlp-deltatocumulative
+    - use-uncached-io
+
+    tracingConfig: {}
+    # enableOTLPReceiver: true
+
+    # exemplars:
+    #   maxSize: 100000
+
+    ## https://prometheus.io/docs/guides/opentelemetry
+    otlp: {}
+      # promoteResourceAttributes: []
+      # keepIdentifyingResourceAttributes: false
+      # translationStrategy: NoUTF8EscapingWithSuffixes
+      # convertHistogramsToNHCB: false
+
+    logLevel: info
+    logFormat: json
+      
+    securityContext:
+      runAsGroup: 50004
+      runAsUser: 50004
+      fsGroup: 50004
+
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node.io/role
+                operator: In
+                values:
+                - core
+
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+    retention: 60d
+    retentionSize: "47GiB"
+
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Delete
+
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi

@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TLSRoute
+metadata:
+  namespace: argocd
+  name: argocd-route
+  labels:
+    app.kubernetes.io/name: argocd-route
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hostnames:
+    - argo.localhost
+  parentRefs:
+  - name: cluster-gateway
+    namespace: cilium
+    sectionName: private-passthrough
+  rules:
+  - backendRefs:
+    - name: argocd-server
+      kind: Service
+      port: 443

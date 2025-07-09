@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pichart.fullname" . }}
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports: {{- toYaml (.Values.service.ports) | nindent 2 }}
+  selector: 
+    {{- include "pichart.selectorLabels" . | nindent 4 }}
+---
+{{- range $k, $v := .Values.sidecars }}
+{{- $labels := include "pichart.labels" $ | fromYaml }}
+{{- $sellabels := include "pichart.selectorLabels" $ }}
+{{- if gt (len $v.params.ports) 0 }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $k }}
+  labels:
+    {{- range $lk, $lv := $labels }}
+    {{- if eq $lk "app.kubernetes.io/instance" }}
+    app.kubernetes.io/instance: {{ regexReplaceAll "\\W+" $v.image "_" }}
+    {{- else if eq $lk "app.kubernetes.io/version" }}
+    app.kubernetes.io/version: {{ $v.tag }}
+    {{- else }}
+    {{- printf "%s: %s" $lk $lv | nindent 4 }}
+    {{- end }}
+    {{- end }}
+spec:
+  ports:
+  - port: {{ (index $v.params.ports 0).containerPort }}
+    {{- if (index $v.params.ports 0).name }}
+    name: {{ (index $v.params.ports 0).name }}
+    {{- end }}
+  selector:
+    {{- $sellabels | nindent 4 }}
+{{- end }}
+{{- end }}

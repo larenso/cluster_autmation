@@ -1,0 +1,226 @@
+createClusterRoles: true
+createAggregateRoles: true
+
+crds:
+  install: false
+
+global:
+  domain: argo.localhost
+  logging:
+    format: json
+  revisionHistoryLimit: 2
+  securityContext:
+   runAsUser: 999
+   runAsGroup: 999
+   fsGroup: 999
+  networkPolicy:
+    create: true
+  affinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node.io/role
+            operator: In
+            values:
+            - core
+
+configs:
+  cm:
+    server.rbac.log.enforce.enable: true
+    admin.enabled: true
+    resource.exclusions: |
+      ### Network resources created by the Kubernetes control plane and excluded to reduce the number of watched events and UI clutter
+      - apiGroups:
+        - ''
+        - discovery.k8s.io
+        kinds:
+        - Endpoints
+        - EndpointSlice
+      ### Internal Kubernetes resources excluded reduce the number of watched events
+      - apiGroups:
+        - coordination.k8s.io
+        kinds:
+        - Lease
+      ### Internal Kubernetes Authz/Authn resources excluded reduce the number of watched events
+      - apiGroups:
+        - authentication.k8s.io
+        - authorization.k8s.io
+        kinds:
+        - SelfSubjectReview
+        - TokenReview
+        - LocalSubjectAccessReview
+        - SelfSubjectAccessReview
+        - SelfSubjectRulesReview
+        - SubjectAccessReview
+      ### Intermediate Certificate Request excluded reduce the number of watched events
+      - apiGroups:
+        - certificates.k8s.io
+        kinds:
+        - CertificateSigningRequest
+      - apiGroups:
+        - cert-manager.io
+        kinds:
+        - CertificateRequest
+      ### Cilium internal resources excluded reduce the number of watched events and UI Clutter
+      - apiGroups:
+        - cilium.io
+        kinds:
+        - CiliumIdentity
+        - CiliumEndpoint
+        - CiliumEndpointSlice
+      ### Kyverno intermediate and reporting resources excluded reduce the number of watched events and improve performance
+      - apiGroups:
+        - kyverno.io
+        - reports.kyverno.io
+        - wgpolicyk8s.io
+        kinds:
+        - PolicyReport
+        - ClusterPolicyReport
+        - EphemeralReport
+        - ClusterEphemeralReport
+        - AdmissionReport
+        - ClusterAdmissionReport
+        - BackgroundScanReport
+        - ClusterBackgroundScanReport
+        - UpdateRequest
+      ### Crds
+      - apiGroups:
+        - apiextensions.k8s.io
+        kinds:
+        - CustomResourceDefinition
+  params:
+    server.basehref: /
+  clusterCredentials: {}
+  repositories: {}
+  tls:
+    create: true
+
+# disabled
+dex:
+  enabled: false
+ingress:
+  enabled: false
+redis:
+  enabled: false
+redis-ha:
+  enabled: false
+redisSecretInit:
+  enabled: false
+notifications:
+  enabled: false
+
+externalRedis:
+  host: valkey.valkey.svc.cluster.local
+  existingSecret: valkey
+
+controller:
+  replicas: 1
+  revisionHistoryLimit: 2
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false
+  resources:
+   limits:
+     cpu: 500m
+     memory: 384Mi
+   requests:
+     cpu: 20m
+     memory: 32Mi
+
+server:
+  autoscaling:
+    enabled: false
+  certificate:
+    enabled: true
+    # additionalHosts: ["192.168.4.2"]
+    duration: 2160h
+    renewBefore: 360h
+    issuer:
+      name: cluster-private
+      kind: ClusterIssuer
+      group: cert-manager.io
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false
+  # httproute:
+  #   enabled: true
+    # parentRefs: 
+    #   - name: cluster-gateway
+    #     namespace: cilium
+    #     # sectionName: https
+    # hostnames:
+    #   - "argo.localhost"
+    # rules:
+    #   - matches:
+    #       - path:
+    #           type: PathPrefix
+    #           value: /
+  
+  # backendTLSPolicy:
+  #   enabled: true
+  #   targetRefs:
+  #   - kind: Service
+  #     name: argocd-server
+  #     sectionName: https
+  #   validation:
+  #     hostname: argocd-server.argocd.svc.cluster.local
+  #     caCertificateRefs:
+  #       - name: argocd-server-tls
+  #         kind: Secret
+  resources:
+   limits:
+     cpu: 500m
+     memory: 128Mi
+   requests:
+     cpu: 50m
+     memory: 32Mi
+
+repoServer:
+  automountServiceAccountToken: false
+  serviceAccount:
+    automountServiceAccountToken: false
+  autoscaling:
+    enabled: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false
+  resources:
+   limits:
+     cpu: 100m
+     memory: 256Mi
+   requests:
+     cpu: 30m
+     memory: 32Mi
+  copyutil:
+    resources:
+     limits:
+       cpu: 100m
+       memory: 128Mi
+     requests:
+       cpu: 10m
+       memory: 32Mi
+
+applicationSet:
+  certificate:
+    enabled: true
+    # additionalHosts: ["192.168.4.2"]
+    duration: 2160h
+    renewBefore: 360h
+    issuer:
+      name: cluster-private
+      kind: ClusterIssuer
+      group: cert-manager.io
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false
+  resources:
+   limits:
+     cpu: 100m
+     memory: 128Mi
+   requests:
+     cpu: 10m
+     memory: 32Mi

@@ -1,0 +1,118 @@
+nameOverride: valkey
+fullnameOverride: valkey
+
+image:
+  repository: valkey/valkey
+  tag: 8.1.4-alpine3.22
+
+service:
+  ports:
+    - port: 6379
+      name: valkey
+
+args: 
+  - "valkey-server"
+  - "/etc/valkey/valkey.conf"
+livenessProbe:
+  exec:
+    command:
+    - redis-cli
+    - -a 
+    - default
+    - ping
+  initialDelaySeconds: 10
+  periodSeconds: 5
+readinessProbe:
+  exec:
+    command:
+    - redis-cli
+    - -a 
+    - default
+    - ping
+  initialDelaySeconds: 5
+  periodSeconds: 5
+resources:
+  limits:
+    cpu: '1'
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+volumeMounts:
+  - name: valkey-vol
+    mountPath: "/etc/valkey/"
+    readOnly: true
+  - name: valkey-data
+    mountPath: "/data/"
+
+sidecars:
+  redis-exporter:
+    image: oliver006/redis_exporter
+    tag: v1.78.0-alpine
+    params:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 32Mi
+      ports:
+        - containerPort: 9121
+          name: http
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 9121
+        initialDelaySeconds: 10
+        periodSeconds: 60
+      args: 
+        - "-redis.password-file=/etc/valkey/auth.json"
+        - "--redis.user=monitoring"
+        - "-debug"
+      volumeMounts:
+      - mountPath: "/etc/valkey/"
+        name: valkey-exporter-vol
+        readOnly: true
+
+volumes:
+  - name: valkey-vol
+    secret:
+      secretName: valkey
+  - name: valkey-exporter-vol
+    secret:
+      secretName: valkey-exporter
+  - name: valkey-data
+    persistentVolumeClaim:
+      claimName: valkey-data
+
+persistentVolumeClaimData:
+  - name: valkey-data
+    accessmode: ReadWriteOncePod
+    annotations:
+      argocd.argoproj.io/sync-options: "Prune=false"
+
+serviceMonitor:
+  enabled: true
+  honorLabels: true
+  port: http
+  path: /scrape
+  matchLabels:
+    app.kubernetes.io/instance: oliver006_redis_exporter
+    app.kubernetes.io/name: valkey
+
+
+terminationGracePeriodSeconds: 20
+
+podSecurityContext:
+  runAsUser: 50002
+  runAsGroup: 50002
+  fsGroup: 50002
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node.io/role
+            operator: In
+            values:
+            - core

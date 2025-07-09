@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  sourceRepos: []
+  sourceNamespaces: []
+  destinations: []
+  namespaceResourceBlacklist:
+  - group: '*'
+    kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: cluster
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  description:  Argocd related resources
+  destinations:
+  - name:       in-cluster
+    namespace:  '*'
+    server:     https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+  - group: gateway.networking.k8s.io
+    kind: GatewayClass
+  - group: ''
+    kind: Namespace
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+  - group: admissionregistration.k8s.io
+    kind: MutatingWebhookConfiguration
+  namespaceResourceWhitelist:                 
+  - group: '*'
+    kind: '*'
+  namespaceResourceBlacklist:
+  - group: ''
+    kind: ResourceQuota
+  - group: ''
+    kind: LimitRange
+  orphanedResources:
+    warn: true
+    ignore:
+    - kind: Secret
+      name: argocd-initial-admin-secret
+    - kind: Secret
+      name: valkey
+    - kind: Secret
+      name: argocd-applicationset-controller-tls
+    - kind: Secret
+      name: argocd-server-tls
+  sourceRepos:
+  - git@github.com:larenso/cluster_autmation.git
+  - https://argoproj.github.io/argo-helm
+  - https://helm.cilium.io/
+  - https://prometheus-community.github.io/helm-charts
+  - https://charts.jetstack.io
+  # syncWindows:
+  # - kind: allow
+  #   schedule: '0 * * * *'
+  #   duration: 1h

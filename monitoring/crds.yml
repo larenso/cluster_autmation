@@ -1,0 +1,39 @@
+crds:
+  enabled: true
+
+cleanPrometheusOperatorObjectNames: true
+kubernetesServiceMonitors:
+  enabled: false
+kubeApiServer:
+  enabled: false
+kubelet:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeStateMetrics:
+  enabled: false
+
+defaultRules:
+  create: false
+global:
+  rbac:
+    create: false
+    createAggregateClusterRoles: false
+nodeExporter:
+  enabled: false
+alertmanager:
+  enabled: false
+grafana:
+  enabled: false
+prometheusOperator:
+  enabled: false
+prometheus:
+  enabled: false

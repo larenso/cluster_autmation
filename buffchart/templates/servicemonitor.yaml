@@ -1,0 +1,73 @@
+{{- if and .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "pichart.fullname" . }}
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+spec:
+  endpoints:
+    - port: {{ .Values.serviceMonitor.port }}
+      {{- with .Values.serviceMonitor.tlsConfig }}
+      scheme: https
+      tlsConfig: 
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.serviceMonitor.interval }}
+      interval: {{ . }}
+      {{- end }}
+      {{- with .Values.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ . }}
+      {{- end }}
+      {{- with .Values.serviceMonitor.honorLabels }}
+      honorLabels: {{ . }}
+      {{- end }}
+      {{- with .Values.serviceMonitor.metricRelabelings }}
+      metricRelabelings: {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- range .Values.serviceMonitor.additionalEndpoints }}
+    - port: {{ .port }}
+      {{- with .tlsConfig }}
+      scheme: https
+      tlsConfig: 
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .interval }}
+      interval: {{ . }}
+      {{- end }}
+      {{- with .scrapeTimeout }}
+      scrapeTimeout: {{ . }}
+      {{- end }}
+      {{- with .honorLabels }}
+      honorLabels: {{ . }}
+      {{- end }}
+      {{- with .metricRelabelings }}
+      metricRelabelings: {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- if .with }}
+      path: {{ . }}
+      {{- end }}
+      {{- if .params }}
+      params:
+        {{- range $key, $value := .params }}
+        {{ $key }}:
+          {{- range $value }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- with .Values.serviceMonitor.podTargetLabels }}
+  podTargetLabels: 
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.serviceMonitor.sampleLimit }}
+  sampleLimit: {{ . }}
+  {{- end }}
+  {{- with .Values.serviceMonitor.targetLimit }}
+  targetLimit: {{ . }}
+  {{- end }}
+  selector:
+    matchLabels: 
+      {{- .Values.serviceMonitor.matchLabels | toYaml | nindent 6 }}
+{{- end }}

@@ -1,0 +1,20 @@
+{{- range $x := .Values.volumes }}
+{{- if $x.persistentVolumeClaim }}
+{{- $obj := include "pichart.findNameInArray" (dict "array" $.Values.persistentVolumeClaimData "keyword" $x.name) | fromYaml }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $x.persistentVolumeClaim.claimName }}
+  labels:
+    {{- include "pichart.labels" $ | nindent 4 }}
+  annotations:
+    {{- toYaml $obj.annotations | nindent 4 }}
+spec:
+  accessModes:
+  - {{ $obj.accessmode | default "ReadWriteOnce"  }}
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: {{ $obj.request | default "1Gi" }}
+{{- end }}
+{{- end }}

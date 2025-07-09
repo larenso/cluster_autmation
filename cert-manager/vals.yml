@@ -1,0 +1,103 @@
+dns01RecursiveNameservers: ""
+
+dns01RecursiveNameserversOnly: false
+
+approveSignerNames:
+- issuers.cert-manager.io/*
+- clusterissuers.cert-manager.io/*
+
+crds:
+  enabled: false
+
+config:
+  apiVersion: controller.config.cert-manager.io/v1alpha1
+  kind: ControllerConfiguration
+  enableGatewayAPI: true
+  logging:
+    format: json
+
+global:
+  revisionHistoryLimit: 2
+  priorityClassName: system-cluster-critical
+  logLevel: 1
+
+replicaCount: 1
+resources:
+  limits:
+    cpu: 150m
+    memory: 64Mi
+  requests:
+    cpu: 10m
+    memory: 32Mi
+
+extraArgs: 
+- --logging-format=json
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: node.io/role
+          operator: In
+          values:
+          - core
+
+webhook:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 64Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+  extraArgs:
+  - --logging-format=json
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node.io/role
+            operator: In
+            values:
+            - core
+
+cainjector:
+  enabled: true
+  config:
+    apiVersion: cainjector.config.cert-manager.io/v1alpha1
+    kind: CAInjectorConfiguration
+    logging:
+      verbosity: 1
+      format: json
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 64Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+  
+  extraArgs: 
+  - --logging-format=json
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node.io/role
+            operator: In
+            values:
+            - core
+
+startupapicheck:
+  enabled: false
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true
+    interval: 300s

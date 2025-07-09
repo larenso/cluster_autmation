@@ -1,0 +1,307 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argocd-watch-role
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: yaml
+rules:
+- apiGroups: [""]
+  resources:
+  - "bindings"
+  - "configmaps"
+  - "endpoints" 
+  - "limitranges"
+  - "namespaces"
+  - "nodes"
+  - "persistentvolumeclaims"
+  - "persistentvolumes"
+  - "pods"
+  - "pods/log"
+  - "pods/status"
+  - "podtemplates"
+  - "replicationcontrollers"
+  - "resourcequotas"
+  - "secrets"
+  - "serviceaccounts"
+  - "services"
+  - "services/status"
+  verbs:     ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs:     ["list"]
+- apiGroups:
+  - "apiextensions.k8s.io"
+  - "apps"
+  - "argoproj.io"
+  - "autoscaling"
+  - "batch"
+  - "cilium.io"
+  - "coordination.k8s.io"
+  # - "discovery.k8s.io"
+  # - "events.k8s.io"
+  # - "flowcontrol.apiserver.k8s.io"
+  - "gateway.networking.k8s.io"
+  - "helm.cattle.io"
+  - "k3s.cattle.io"
+  # - "metrics.k8s.io"
+  - "networking.k8s.io"
+  # - "node.k8s.io"
+  - "policy"
+  - "rbac.authorization.k8s.io"
+  # - "scheduling.k8s.io"
+  - "storage.k8s.io"
+  resources: ["*"]
+  verbs:     ["get", "list", "watch"]
+- apiGroups:     [""]
+  resources:     ["serviceaccounts"]
+  resourceNames: ["argocd-deployer"]
+  verbs:         ["impersonate"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-watch-binding
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: yaml
+subjects:
+- kind: ServiceAccount
+  name: argocd-application-controller
+  namespace: argocd
+roleRef:
+  kind: Role
+  name: argocd-watch-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-watch-server-binding
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: yaml
+subjects:
+- kind: ServiceAccount
+  name: argocd-server
+  namespace: argocd
+roleRef:
+  kind: Role
+  name: argocd-watch-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argocd-watch-role
+  namespace: valkey
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/managed-by: yaml
+    app.kubernetes.io/part-of: argocd
+rules:
+- apiGroups: [""]
+  resources:
+  - "bindings"
+  - "configmaps"
+  - "endpoints" 
+  - "limitranges"
+  - "namespaces"
+  - "nodes"
+  - "persistentvolumeclaims"
+  - "persistentvolumes"
+  - "pods"
+  - "pods/log"
+  - "pods/status"
+  - "podtemplates"
+  - "replicationcontrollers"
+  - "resourcequotas"
+  - "secrets"
+  - "serviceaccounts"
+  - "services"
+  - "services/status"
+  verbs:     ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs:     ["list"]
+- apiGroups:
+  - "apiextensions.k8s.io"
+  - "apps"
+  - "argoproj.io"
+  - "autoscaling"
+  - "batch"
+  - "cilium.io"
+  - "coordination.k8s.io"
+  # - "discovery.k8s.io"
+  # - "events.k8s.io"
+  # - "flowcontrol.apiserver.k8s.io"
+  - "gateway.networking.k8s.io"
+  - "helm.cattle.io"
+  - "k3s.cattle.io"
+  # - "metrics.k8s.io"
+  - "networking.k8s.io"
+  # - "node.k8s.io"
+  - "policy"
+  - "rbac.authorization.k8s.io"
+  # - "scheduling.k8s.io"
+  - "storage.k8s.io"
+  resources: ["*"]
+  verbs:     ["get", "list", "watch"]
+- apiGroups:     [""]
+  resources:     ["serviceaccounts"]
+  resourceNames: ["system:serviceaccount:argocd:argocd-deployer"]
+  verbs:         ["impersonate"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-watch-binding
+  namespace: valkey
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller                               
+    app.kubernetes.io/managed-by: yaml
+    app.kubernetes.io/part-of: argocd
+subjects:
+- kind: ServiceAccount
+  name: argocd-application-controller
+  namespace: argocd
+roleRef:
+  kind: Role
+  name: argocd-watch-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-watch-server-binding
+  namespace: valkey
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: yaml
+subjects:
+- kind: ServiceAccount
+  name: argocd-server
+  namespace: argocd
+roleRef:
+  kind: Role
+  name: argocd-watch-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argocd-deployer
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: yaml
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argocd-deployer
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: yaml
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs:     ["get"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs:     ["get", "list", "watch", "create", "patch"]
+- apiGroups: [""]
+  resources: ["services", "serviceaccounts"]
+  verbs:     ["get", "list", "watch", "create", "patch", "update"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs:     ["get", "list", "watch", "create", "patch", "update", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets"]
+  verbs:     ["get", "list", "watch", "create", "patch", "update"]
+- apiGroups: ["extensions"]
+  resources: ["deployments"]
+  verbs:     ["get", "list", "watch"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["*"]
+  verbs:     ["get", "list", "watch", "create", "patch", "update", "delete"]
+- apiGroups: ["networking.k8s.io", "rbac.authorization.k8s.io"]
+  resources: ["*"]
+  verbs:     ["get", "patch", "update"]
+- apiGroups: ["argoproj.io"]
+  resources: ["*"]
+  verbs:     ["get", "list", "watch", "create", "patch", "update", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-deployer-binding
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: yaml
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argocd-deployer
+subjects:
+- kind: ServiceAccount
+  name: argocd-deployer
+  namespace: argocd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argocd-deployer-role
+  namespace: valkey
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: yaml
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "services", "persistentvolumeclaims", "serviceaccounts"]
+  verbs:     ["get", "patch", "update"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs:     ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-deployer-binding
+  namespace: valkey
+  labels:
+    app.kubernetes.io/name: argocd-application-controller
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/managed-by: yaml
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argocd-deployer-role
+subjects:
+- kind: ServiceAccount
+  name: argocd-deployer
+  namespace: argocd

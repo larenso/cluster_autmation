@@ -1,0 +1,139 @@
+{{- if .Values.certmanager.groupName }}
+### Api registration ###
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.{{ .Values.certmanager.groupName }}
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/inject-ca-from: "{{ .Release.Namespace }}/{{ include "pichart.servingCertificate" . }}"
+spec:
+  group: {{ .Values.certmanager.groupName }}
+  groupPriorityMinimum: 1000
+  versionPriority: 15
+  service:
+    name: {{ include "pichart.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+  version: v1alpha1
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "pichart.servingCertificate" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "pichart.servingCertificate" . }}
+  duration: 8760h # 1y
+  renewBefore: 360h # 15d
+  privateKey:
+    rotationPolicy: "Always"
+    algorithm: RSA
+  issuerRef:
+    name: {{ .Values.certmanager.issuer }}
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+  - {{ include "pichart.fullname" . }}
+  - {{ include "pichart.fullname" . }}.{{ .Release.Namespace }}
+  - {{ include "pichart.fullname" . }}.{{ .Release.Namespace }}.svc
+---
+### Roles ###
+# Grant the webhook permission to read the ConfigMap containing the Kubernetes
+# apiserver's requestheader-ca-certificate.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "pichart.serviceAccountName" . }}:webhook-authentication-reader
+  namespace: kube-system
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+- apiGroup: ""
+  kind: ServiceAccount
+  name: {{ include "pichart.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+---
+# apiserver gets the auth-delegator role to delegate auth decisions to
+# the core apiserver
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "pichart.serviceAccountName" . }}:auth-delegator
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- apiGroup: ""
+  kind: ServiceAccount
+  name: {{ include "pichart.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+---
+# Grant cert-manager permission to validate using our apiserver
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "pichart.serviceAccountName" . }}:domain-solver
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - {{ .Values.certmanager.groupName }}
+  resources:
+  - '*'
+  verbs:
+  - 'create'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "pichart.serviceAccountName" . }}:domain-solver
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "pichart.serviceAccountName" . }}:domain-solver
+subjects:
+- apiGroup: ""
+  kind: ServiceAccount
+  name: {{ .Values.certmanager.certManager.serviceAccountName }}
+  namespace: {{ .Values.certmanager.namespace }}
+---
+# Read porkbun secrets
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "pichart.serviceAccountName" . }}-key:reader
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["porkbun-key"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "pichart.serviceAccountName" . }}:key-reader
+  labels: 
+    {{- include "pichart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "pichart.serviceAccountName" . }}-key:reader
+subjects:
+- apiGroup: ""
+  kind: ServiceAccount
+  name: {{ include "pichart.serviceAccountName" . }}
+{{- end }}

@@ -1,0 +1,36 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  namespace: cilium
+  name: cluster-gateway
+  labels:
+    app.kubernetes.io/name: cilium-gateway
+    app.kubernetes.io/part-of: cilium
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  gatewayClassName: cilium
+  listeners:
+  - name: private-passthrough
+    hostname: "*.localhost"
+    protocol: TLS
+    port: 3000
+    tls:
+      mode: Passthrough
+    allowedRoutes:
+      namespaces:
+        from: Selector
+        selector:
+          matchLabels:
+            gateway-listener.kubernetes.io/access-mode: private
+  # - name: public-https
+  #   hostname: "*.ebapeka.top"
+  #   protocol: HTTPS
+  #   port: 8443
+  #   tls:
+  #     mode: Terminate
+  #   allowedRoutes:
+  #     namespaces:
+  #       from: Selector
+  #       selector:
+  #         matchLabels:
+  #           gateway-listener.kubernetes.io/access-mode: public

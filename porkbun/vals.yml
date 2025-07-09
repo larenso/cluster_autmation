@@ -1,0 +1,73 @@
+nameOverride: porkbun
+fullnameOverride: porkbun
+
+image:
+  repository: larenso/cluster_am
+  tag: pb.latest
+
+args:
+- --tls-cert-file=/tls/tls.crt
+- --tls-private-key-file=/tls/tls.key
+
+env:
+- name: GROUP_NAME
+  value: "porkbun"
+
+service:
+  ports:
+  - port: 443
+    name: https
+    appProtocol: https
+
+livenessProbe:
+  httpGet:
+    scheme: HTTPS
+    path: /healthz
+    port: 443
+readinessProbe:
+  httpGet:
+    scheme: HTTPS
+    path: /healthz
+    port: 443
+
+volumeMounts:
+- name: certs
+  mountPath: /tls
+  readOnly: true
+
+volumes:
+- name: certs
+  secret:
+    secretName: porkbun-tls
+
+resources:
+  limits:
+    memory: 64Mi
+  requests:
+    cpu: 20m
+    memory: 32Mi
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node.io/role
+            operator: In
+            values:
+            - core
+
+serviceAccount:
+  create: true
+  automount: true
+
+podSecurityContext:
+  runAsUser: 50001
+  runAsGroup: 50001
+  fsGroup: 50001
+
+certmanager:
+  groupName: "porkbun"
+  serviceAccountName: cert-manager
+  namespace: cert-manager
+  issuer: cluster-private

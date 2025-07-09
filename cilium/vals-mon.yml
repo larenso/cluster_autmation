@@ -1,0 +1,39 @@
+prometheus:
+  enabled: true
+  metricsService: true
+  serviceMonitor:
+    enabled: true
+
+dashboards:
+  enabled: true
+  namespace: monitoring
+
+envoy:
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+operator:
+  prometheus:
+    metricsService: true
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  dashboards:
+    enabled: true
+    namespace: monitoring
+
+hubble:
+  enabled: false
+  metrics:
+    enabled: ~
+    tls:
+      enabled: false
+      server:
+        existingSecret: ""
+    serviceMonitor: 
+      enabled: false
+    dashboards:
+      enabled: false
+      namespace: monitoring

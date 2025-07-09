@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TLSRoute
+metadata:
+  namespace: monitoring
+  name: grafana-route
+  labels:
+    app.kubernetes.io/name: grafana-route
+    app.kubernetes.io/component: grafana
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hostnames:
+    - grafana.localhost
+  parentRefs:
+  - name: cluster-gateway
+    namespace: cilium
+    sectionName: private-passthrough
+  rules:
+  - backendRefs:
+    - name: kube-prometheus-stack-grafana
+      kind: Service
+      port: 80
