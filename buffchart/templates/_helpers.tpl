@@ -62,3 +62,12 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "pichart.findNameInArray" -}}
+{{- $keyword := .keyword -}}
+{{- range $item := .array -}}
+{{- if eq (get $item "name") $keyword -}}
+{{- $item | toYaml -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

@@ -111,6 +111,11 @@ volumes: []
 #     secretName: mysecret
 #     optional: false
 
+persistentVolumeClaimData: []
+# - name: foo
+#   accessmode: ReadWriteOncePod
+#   request: 1Gi
+
 # Additional volumeMounts on the output Deployment definition.
 volumeMounts: []
 # - name: foo

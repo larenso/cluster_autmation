@@ -77,9 +77,10 @@ volumes:
   - name: valkey-data
     persistentVolumeClaim:
       claimName: valkey-data
-      meta: 
-        accessmode: ReadWriteOncePod
 
+persistentVolumeClaimData:
+  - name: valkey-data
+    accessmode: ReadWriteOncePod
 
 terminationGracePeriodSeconds: 20
 
