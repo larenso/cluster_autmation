@@ -36,9 +36,11 @@ resources:
     cpu: 100m
     memory: 200Mi
 volumeMounts:
-  - mountPath: "/etc/valkey/"
-    name: valkey-vol
+  - name: valkey-vol
+    mountPath: "/etc/valkey/"
     readOnly: true
+  - name: valkey-data
+    mountPath: "/data/"
 sidecars:
   redis-exporter:
     image: oliver006/redis_exporter
@@ -72,6 +74,12 @@ volumes:
   - name: valkey-exporter-vol
     secret:
       secretName: valkey-exporter
+  - name: valkey-data
+    persistentVolumeClaim:
+      claimName: valkey-data
+      meta: 
+        accessmode: ReadWriteOncePod
+
 
 terminationGracePeriodSeconds: 20
 

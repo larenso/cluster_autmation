@@ -1,40 +1,15 @@
 createClusterRoles: false
 
-redis-ha:
-  enabled: false
-redis:
-  enabled: false
-redisSecretInit:
-  enabled: false
-externalRedis:
-  host: valkey.valkey.svc.cluster.local
-  existingSecret: valkey
-
-controller:
-  replicas: 1
-
-server:
-  autoscaling:
-    enabled: false
-  service:
-    type: NodePort
-
-repoServer:
-  autoscaling:
-    enabled: false
-
 global:
   domain: 192.168.4.2
   logging:
     format: json
   securityContext:
-   runAsUser: 1099
-   runAsGroup: 1099
-   fsGroup: 1099
+   runAsUser: 1000
+   runAsGroup: 1000
+   fsGroup: 1000
   networkPolicy:
     create: true
-  params:
-    application.namespaces: "valkey"
   affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
@@ -44,12 +19,49 @@ global:
             values:
             - pi
 
-affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: wloads
-            operator: In
-            values:
-            - pi
+configs:
+  cm:
+    application.sync.impersonation.enabled: true
+    server.rbac.log.enforce.enable: true
+    admin.enabled: true
+
+  # params:
+  #     application.namespaces: "valkey,argocd"
+
+  clusterCredentials: {}
+  repositories: {}
+    # istio-helm-repo:
+    #   url: https://storage.googleapis.com/istio-prerelease/daily-build/master-latest-daily/charts
+    #   name: istio.io
+    #   type: helm
+    # private-helm-repo:
+    #   url: https://my-private-chart-repo.internal
+    #   name: private-repo
+    #   type: helm
+    #   password: my-password
+    #   username: my-username
+    # private-repo:
+    #   url: https://github.com/argoproj/private-repo
+
+
+controller:
+  replicas: 1
+dex:
+  enabled: false
+redis:
+  enabled: false
+redis-ha:
+  enabled: false
+redisSecretInit:
+  enabled: false
+externalRedis:
+  host: valkey.valkey.svc.cluster.local
+  existingSecret: valkey
+server:
+  autoscaling:
+    enabled: false
+repoServer:
+  autoscaling:
+    enabled: false
+notifications:
+  enabled: false
