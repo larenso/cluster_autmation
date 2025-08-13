@@ -7,6 +7,8 @@ metadata:
   name: {{ $x.persistentVolumeClaim.claimName }}
   labels:
     {{- include "pichart.labels" $ | nindent 4 }}
+  annotations:
+    {{- toYaml $obj.annotations | nindent 4 }}
 spec:
   accessModes:
     - {{ $obj.accessmode | default "ReadWriteOnce"  }}

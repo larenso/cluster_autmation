@@ -81,6 +81,8 @@ volumes:
 persistentVolumeClaimData:
   - name: valkey-data
     accessmode: ReadWriteOncePod
+    annotations:
+      argocd.argoproj.io/sync-options: "Prune=false"
 
 terminationGracePeriodSeconds: 20
 

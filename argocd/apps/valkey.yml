@@ -19,3 +19,6 @@ spec:
   project: argo
   syncPolicy:
     automated: null
+    syncOptions:
+    - RespectIgnoreDifferences=true
+    - ApplyOutOfSyncOnly=true
