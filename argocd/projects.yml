@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  labels:
+    app.kubernetes.io/managed-by: yaml
+spec:
+  sourceRepos: []
+  sourceNamespaces: []
+  destinations: []
+  namespaceResourceBlacklist:
+  - group: "*"
+    kind: "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: argo
+  labels:
+    app.kubernetes.io/managed-by: yaml
+spec:
+  description:  Argocd related resources
+  destinations:
+  - name:       in-cluster
+    namespace:  valkey
+    server:     https://kubernetes.default.svc
+  - name:       in-cluster
+    namespace:  argocd
+    server:     https://kubernetes.default.svc
+  destinationServiceAccounts:
+  - server: https://kubernetes.default.svc
+    namespace: valkey
+    defaultServiceAccount: argocd-deployer
+  - server: https://kubernetes.default.svc
+    namespace: argocd
+    defaultServiceAccount: argocd-deployer
+  namespaceResourceWhitelist:                 
+  - group: "*"
+    kind: "*"
+  namespaceResourceBlacklist:
+  - group: ''
+    kind: ResourceQuota
+  - group: ''
+    kind: LimitRange
+  sourceRepos:
+  - git@github.com:larenso/cluster_autmation.git
+  - https://argoproj.github.io/argo-helm
+  # syncWindows:
+  # - kind: allow
+  #   schedule: '0 * * * *'
+  #   duration: 1h

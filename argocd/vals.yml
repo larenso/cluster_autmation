@@ -20,8 +20,6 @@ global:
             - pi
 
 configs:
-  params:
-    application.namespaces: "valkey"
   cm:
     application.sync.impersonation.enabled: true
     server.rbac.log.enforce.enable: true
