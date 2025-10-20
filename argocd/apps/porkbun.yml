@@ -1,28 +1,24 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cilium
+  name: porkbun
   namespace: argocd
   labels:
     app.kubernetes.io/managed-by: kustomize
 spec:
   destination:
-    namespace: cilium
+    namespace: cert-manager
     server: https://kubernetes.default.svc
   sources:
-  - repoURL: https://helm.cilium.io/
-    chart: cilium
-    targetRevision: 1.18.2
+  - repoURL: git@github.com:larenso/cluster_autmation.git
+    path: buffchart
+    targetRevision: main
     helm:
       valueFiles:
-        - $vals/cilium/vals.yml
-        - $vals/cilium/vals-mon.yml
+        - $vals/porkbun/vals.yml
   - repoURL: git@github.com:larenso/cluster_autmation.git
     targetRevision: main
     ref: vals
-  - repoURL: git@github.com:larenso/cluster_autmation.git
-    targetRevision: main
-    path: cilium
   project: cluster
   syncPolicy:
     automated: null

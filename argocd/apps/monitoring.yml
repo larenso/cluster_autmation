@@ -19,6 +19,9 @@ spec:
   - repoURL: git@github.com:larenso/cluster_autmation.git
     targetRevision: main
     ref: vals
+  - repoURL: git@github.com:larenso/cluster_autmation.git
+    targetRevision: main
+    path: monitoring
   project: cluster
   syncPolicy:
     automated: null

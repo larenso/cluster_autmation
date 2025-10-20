@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/component: porkbun
     app.kubernetes.io/part-of: cluster
-    app.kubernetes.io/managed-by: yaml
+    app.kubernetes.io/managed-by: kustomize
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
@@ -38,7 +38,7 @@ metadata:
   labels:
     app.kubernetes.io/component: cilium
     app.kubernetes.io/part-of: cluster
-    app.kubernetes.io/managed-by: yaml
+    app.kubernetes.io/managed-by: kustomize
 spec:
   secretName: public-cert-tls
   issuerRef:

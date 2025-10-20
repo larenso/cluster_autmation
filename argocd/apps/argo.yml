@@ -22,9 +22,6 @@ spec:
   - repoURL: git@github.com:larenso/cluster_autmation.git
     targetRevision: main
     path: argocd
-  - repoURL: git@github.com:larenso/cluster_autmation.git
-    targetRevision: main
-    path: argocd/apps
   project: cluster
   syncPolicy:
     automated: null

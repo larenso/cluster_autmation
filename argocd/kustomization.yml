@@ -11,4 +11,5 @@ resources:
 - apps/cert-manager.yml
 - apps/cilium.yml
 - apps/monitoring.yml
+- apps/porkbun.yml
 - apps/valkey.yml

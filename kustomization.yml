@@ -24,14 +24,11 @@ resources:
 - argocd/apps/cilium.yml
 - argocd/apps/monitoring.yml
 - argocd/apps/valkey.yml
-# dashboards
-- cert-manager/dashboard.yml
-- valkey/dashboard.yml
 # cert-manager
 - cert-manager/issuer.yml
-# - cert-manager/letsencrypt-issuer.yml
 # gateway
 - cilium/gateway.yml
-- cilium/routes.yml
 # monitoring
 - monitoring/route.yml
+- monitoring/dashboard-cert-manager.yml
+- monitoring/dashboard-valkey.yml

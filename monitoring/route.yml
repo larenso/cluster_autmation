@@ -17,6 +17,6 @@ spec:
     sectionName: private-passthrough
   rules:
   - backendRefs:
-    - name: kube-prometheus-stack-grafana
+    - name: monitoring-grafana
       kind: Service
       port: 80

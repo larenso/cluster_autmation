@@ -41,6 +41,10 @@ spec:
     kind: ValidatingWebhookConfiguration
   - group: admissionregistration.k8s.io
     kind: MutatingWebhookConfiguration
+  - group: cert-manager.io
+    kind: ClusterIssuer
+  - group: apiregistration.k8s.io
+    kind: APIService
   namespaceResourceWhitelist:                 
   - group: '*'
     kind: '*'
@@ -55,11 +59,31 @@ spec:
     - kind: Secret
       name: argocd-initial-admin-secret
     - kind: Secret
-      name: valkey
-    - kind: Secret
       name: argocd-applicationset-controller-tls
     - kind: Secret
       name: argocd-server-tls
+    - kind: Secret
+      name: cluster-repo
+    - kind: Secret
+      name: valkey
+    - kind: Secret
+      name: valkey-exporter
+    - kind: Secret
+      name: porkbun-key
+    - kind: Secret
+      name: porkbun-tls
+    - kind: Secret
+      name: grafana-tls
+    - kind: Secret
+      name: grafana-secret
+    - kind: Secret
+      name: cluster-ca
+    - kind: Secret
+      name: cert-manager-webhook-ca
+    - kind: Secret
+      name: monitoring-kube-prometheus-admission
+    - kind: Secret
+      name: sh.helm.release.*
   sourceRepos:
   - git@github.com:larenso/cluster_autmation.git
   - https://argoproj.github.io/argo-helm
