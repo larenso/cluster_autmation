@@ -20,10 +20,6 @@ resources:
 - argocd/route.yml
 - argocd/projects.yml
 - argocd/apps/argo.yml
-- argocd/apps/cert-manager.yml
-- argocd/apps/cilium.yml
-- argocd/apps/monitoring.yml
-- argocd/apps/valkey.yml
 # cert-manager
 - cert-manager/issuer.yml
 # gateway
