@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ha
+  namespace: argocd
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  destination:
+    namespace: apps
+    server: https://kubernetes.default.svc
+  sources:
+  - repoURL: git@github.com:larenso/cluster_autmation.git
+    targetRevision: main
+    path: ha
+  - repoURL: git@github.com:larenso/cluster_autmation.git
+    path: buffchart
+    targetRevision: main
+    helm:
+      valueFiles:
+        - $vals/ha/vals.yml
+  - repoURL: git@github.com:larenso/cluster_autmation.git
+    targetRevision: main
+    ref: vals
+  project: cluster
+  syncPolicy:
+    automated: null
+    syncOptions:
+    - RespectIgnoreDifferences=true
+    - ApplyOutOfSyncOnly=true

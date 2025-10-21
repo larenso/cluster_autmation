@@ -1,5 +1,7 @@
 replicaCount: 1
 
+stateful: false
+
 image:
   repository: ""
   pullPolicy: IfNotPresent
@@ -71,6 +73,10 @@ volumes: []
 #   secret:
 #     secretName: mysecret
 #     optional: false
+
+env: []
+# - name: key
+#   value: val
 
 # creates persistent claims that would be required for 
 persistentVolumeClaimData: []

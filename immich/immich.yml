@@ -1,0 +1,111 @@
+nameOverride: immich
+fullnameOverride: immich
+
+stateful: true
+
+image:
+  repository: ghcr.io/immich-app/immich-server
+  tag: "latest"
+
+service:
+  ports:
+  - port: 2283
+    name: http
+
+env:
+- name: DB_HOSTNAME
+  value: postgres
+- name: DB_PASSWORD_FILE
+  value: /secrets/db
+- name: REDIS_HOSTNAME
+  value: valkey.valkey.svc.cluster.local
+- name: REDIS_USERNAME
+  valueFrom:
+    secretKeyRef:
+      name: valkey
+      key: redis-username
+- name: REDIS_PASSWORD_FILE
+  value: /secrets/r
+- name: IMMICH_PORT
+  value: "2283"
+- name: TZ
+  value: "Europe/Oslo"
+
+livenessProbe:
+  httpGet:
+    path: /api/server/ping
+    port: 2283
+  initialDelaySeconds: 5
+  periodSeconds: 10
+readinessProbe:
+  httpGet:
+    path: /api/server/ping
+    port: 2283
+  initialDelaySeconds: 1
+  periodSeconds: 5
+resources:
+  limits:
+    cpu: '2'
+    memory: 1Gi
+  requests:
+    cpu: 50m
+    memory: 256Mi
+
+volumeMounts:
+- name: immich-data
+  mountPath: "/data"
+# - name: lib
+#   mountPath: "/lib"
+- name: db
+  mountPath: /secrets/db
+  subPath: db
+  readOnly: true
+- name: valkey
+  mountPath: /secrets/r
+  subPath: r
+  readOnly: true
+  
+volumes:
+- name: immich-data
+  persistentVolumeClaim:
+    claimName: immich-data
+# - name: lib
+#   hostPath:
+#     path: /mnt/data/library_cust
+#     type: DirectoryOrCreate
+- name: db
+  secret:
+    secretName: postgres
+    items:
+    - key: pg-password
+      path: db
+- name: valkey
+  secret:
+    secretName: valkey
+    items:
+    - key: redis-password
+      path: r
+
+persistentVolumeClaimData:
+- name: immich-data
+  accessmode: ReadWriteOncePod
+  request: 1000Gi
+  annotations:
+    argocd.argoproj.io/sync-options: "Prune=false"
+
+terminationGracePeriodSeconds: 15
+
+podSecurityContext:
+  runAsUser: 50003
+  runAsGroup: 50003
+  fsGroup: 50003
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node.io/role
+            operator: In
+            values:
+            - core

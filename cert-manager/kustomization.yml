@@ -5,4 +5,5 @@ metadata:
   name: cert-manager-resources
 
 resources:
+- config.yml
 - issuer.yml

@@ -36,7 +36,7 @@ metadata:
   name: public-cert
   namespace: cilium
   labels:
-    app.kubernetes.io/component: cilium
+    app.kubernetes.io/component: cilium-gateway
     app.kubernetes.io/part-of: cluster
     app.kubernetes.io/managed-by: kustomize
 spec:
@@ -48,4 +48,5 @@ spec:
     rotationPolicy: "Always"
   renewBefore: 360h # 15d
   dnsNames:
+    - "ebapeka.top"
     - "*.ebapeka.top"

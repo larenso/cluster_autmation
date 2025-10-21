@@ -10,6 +10,10 @@ resources:
 - apps/argo.yml
 - apps/cert-manager.yml
 - apps/cilium.yml
+- apps/ha.yml
+- apps/immich.yml
+- apps/ml.yml
 - apps/monitoring.yml
 - apps/porkbun.yml
+- apps/postgres.yml
 - apps/valkey.yml

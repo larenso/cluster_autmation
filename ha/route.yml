@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  namespace: apps
+  name: ha-route
+  labels:
+    app.kubernetes.io/name: ha-route
+    app.kubernetes.io/component: ha
+    app.kubernetes.io/part-of: ha
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hostnames:
+    - ha.ebapeka.top
+  parentRefs:
+  - name: cluster-gateway
+    namespace: cilium
+    sectionName: public-https
+  rules:
+  - backendRefs:
+    - name: ha
+      kind: Service
+      port: 8123

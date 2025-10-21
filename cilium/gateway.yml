@@ -4,7 +4,7 @@ metadata:
   namespace: cilium
   name: cluster-gateway
   labels:
-    app.kubernetes.io/name: cilium-gateway
+    app.kubernetes.io/component: cilium-gateway
     app.kubernetes.io/part-of: cilium
     app.kubernetes.io/managed-by: kustomize
 spec:
@@ -22,15 +22,19 @@ spec:
         selector:
           matchLabels:
             gateway-listener.kubernetes.io/access-mode: private
-  # - name: public-https
-  #   hostname: "*.ebapeka.top"
-  #   protocol: HTTPS
-  #   port: 8443
-  #   tls:
-  #     mode: Terminate
-  #   allowedRoutes:
-  #     namespaces:
-  #       from: Selector
-  #       selector:
-  #         matchLabels:
-  #           gateway-listener.kubernetes.io/access-mode: public
+  - name: public-https
+    hostname: "*.ebapeka.top"
+    protocol: HTTPS
+    port: 8443
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - kind: Secret
+        name: public-cert-tls
+        group: ''
+    allowedRoutes:
+      namespaces:
+        from: Selector
+        selector:
+          matchLabels:
+            gateway-listener.kubernetes.io/access-mode: public

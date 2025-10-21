@@ -10,18 +10,18 @@ spec:
     namespace: argocd
     server: https://kubernetes.default.svc
   sources:
+  - repoURL: git@github.com:larenso/cluster_autmation.git
+    targetRevision: main
+    path: argocd
   - repoURL: https://argoproj.github.io/argo-helm
     chart: argo-cd
-    targetRevision: 9.0.1
+    targetRevision: 9.0.5
     helm:
       valueFiles:
         - $vals/argocd/vals.yml
   - repoURL: git@github.com:larenso/cluster_autmation.git
     targetRevision: main
     ref: vals
-  - repoURL: git@github.com:larenso/cluster_autmation.git
-    targetRevision: main
-    path: argocd
   project: cluster
   syncPolicy:
     automated: null

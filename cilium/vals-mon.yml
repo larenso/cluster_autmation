@@ -4,10 +4,6 @@ prometheus:
   serviceMonitor:
     enabled: true
 
-dashboards:
-  enabled: true
-  namespace: monitoring
-
 envoy:
   prometheus:
     enabled: true
@@ -16,13 +12,10 @@ envoy:
 
 operator:
   prometheus:
-    metricsService: true
-    enabled: true
+    metricsService: false
+    enabled: false
     serviceMonitor:
-      enabled: true
-  dashboards:
-    enabled: true
-    namespace: monitoring
+      enabled: false
 
 hubble:
   enabled: false
@@ -34,6 +27,3 @@ hubble:
         existingSecret: ""
     serviceMonitor: 
       enabled: false
-    dashboards:
-      enabled: false
-      namespace: monitoring

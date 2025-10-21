@@ -1,0 +1,21 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: postgres
+  namespace: apps
+  labels:
+    app.kubernetes.io/component: postgres
+    app.kubernetes.io/part-of: immich
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  secretName: postgres-tls
+  commonName: postgres.localhost
+  duration: 2160h # 90d
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: cluster-private
+  privateKey:
+    algorithm: RSA
+    rotationPolicy: "Always"
+  renewBefore: 360h # 15d

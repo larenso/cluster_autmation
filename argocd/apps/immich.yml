@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: immich
+  namespace: argocd
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  destination:
+    namespace: apps
+    server: https://kubernetes.default.svc
+  sources:
+  - repoURL: git@github.com:larenso/cluster_autmation.git
+    path: buffchart
+    targetRevision: main
+    helm:
+      valueFiles:
+        - $vals/immich/immich.yml
+      valuesInline:
+        image:
+          tag: "v2.2.1"
+  - repoURL: git@github.com:larenso/cluster_autmation.git
+    targetRevision: main
+    ref: vals
+  project: cluster
+  syncPolicy:
+    automated: null
+    syncOptions:
+    - RespectIgnoreDifferences=true
+    - ApplyOutOfSyncOnly=true

@@ -125,15 +125,14 @@ controller:
      cpu: 500m
      memory: 384Mi
    requests:
-     cpu: 20m
-     memory: 32Mi
+     cpu: 30m
+     memory: 128Mi
 
 server:
   autoscaling:
     enabled: false
   certificate:
     enabled: true
-    # additionalHosts: ["192.168.4.2"]
     duration: 2160h
     renewBefore: 360h
     issuer:
@@ -206,7 +205,6 @@ repoServer:
 applicationSet:
   certificate:
     enabled: true
-    # additionalHosts: ["192.168.4.2"]
     duration: 2160h
     renewBefore: 360h
     issuer:
@@ -220,7 +218,7 @@ applicationSet:
   resources:
    limits:
      cpu: 100m
-     memory: 128Mi
+     memory: 64Mi
    requests:
      cpu: 10m
-     memory: 32Mi
+     memory: 64Mi

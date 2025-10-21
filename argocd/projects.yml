@@ -57,27 +57,33 @@ spec:
     warn: true
     ignore:
     - kind: Secret
+      name: porkbun-key
+    - kind: Secret
+      name: postgres
+    - kind: Secret
       name: argocd-initial-admin-secret
     - kind: Secret
-      name: argocd-applicationset-controller-tls
-    - kind: Secret
-      name: argocd-server-tls
-    - kind: Secret
-      name: cluster-repo
+      name: grafana-secret
     - kind: Secret
       name: valkey
     - kind: Secret
       name: valkey-exporter
     - kind: Secret
-      name: porkbun-key
+      name: cluster-repo
+    - kind: Secret
+      name: cluster-ca
+    - kind: Secret
+      name: argocd-applicationset-controller-tls
+    - kind: Secret
+      name: argocd-server-tls
     - kind: Secret
       name: porkbun-tls
     - kind: Secret
       name: grafana-tls
     - kind: Secret
-      name: grafana-secret
+      name: public-cert-tls
     - kind: Secret
-      name: cluster-ca
+      name: letsencrypt-key
     - kind: Secret
       name: cert-manager-webhook-ca
     - kind: Secret

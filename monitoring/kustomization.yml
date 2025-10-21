@@ -2,10 +2,34 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 metadata:
-  name: cert-manager-resources
+  name: monitoring-resources
 
 resources:
 - certificate.yml
-- dashboard-cert-manager.yml
-- dashboard-valkey.yml
 - route.yml
+
+configMapGenerator:
+- name: dashboards
+  files:
+  - dashboards/alert-manager.json
+  - dashboards/cert-manager.json
+  - dashboards/cilium-operator.json
+  - dashboards/cilium.json
+  - dashboards/cluster.json
+  - dashboards/core-dns.json
+  - dashboards/grafana-overview.json
+  - dashboards/kubelet.json
+  - dashboards/multicluster.json
+  - dashboards/namespace-pod.json
+  - dashboards/namespace-workload.json
+  - dashboards/net-cluster.json
+  - dashboards/net-namespace-pod.json
+  - dashboards/net-namespace-workload.json
+  - dashboards/net-pod.json
+  - dashboards/net-workload.json
+  - dashboards/node-pods.json
+  - dashboards/persistent-vols.json
+  - dashboards/pods.json
+  - dashboards/prometheus.json
+  - dashboards/redis.json
+  - dashboards/workload.json

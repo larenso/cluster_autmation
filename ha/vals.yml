@@ -1,0 +1,98 @@
+nameOverride: ha
+fullnameOverride: ha
+
+image:
+  repository: ghcr.io/home-assistant/home-assistant
+  tag: "2025.10"
+
+service:
+  ports:
+  - port: 8123
+    name: http
+
+# hostNetwork: true
+# dnsPolicy: ClusterFirstWithHostNet
+
+env:
+  - name: TZ
+    value: "Europe/Oslo"
+
+livenessProbe:
+  httpGet:
+    path: /manifest.json
+    port: 8123
+  initialDelaySeconds: 10
+  periodSeconds: 10
+readinessProbe:
+  httpGet:
+    path: /manifest.json
+    port: 8123
+  initialDelaySeconds: 5
+  periodSeconds: 5
+resources:
+  limits:
+    cpu: '1'
+    memory: 640Mi
+  requests:
+    cpu: 50m
+    memory: 512Mi
+
+volumeMounts:
+- name: ha-data
+  mountPath: "/config"
+  readOnly: false
+- name: usb-zigbee
+  mountPath: /dev/ttyUSB0
+- name: config-volume
+  mountPath: /configuration.yaml
+  subPath: configuration.yaml
+  readOnly: true
+  
+volumes:
+- name: ha-data
+  persistentVolumeClaim:
+    claimName: ha-data
+- name: usb-zigbee
+  hostPath:
+    path: /dev/ttyUSB0
+    type: CharDevice
+- name: config-volume
+  configMap:
+    name: ha-config
+
+persistentVolumeClaimData:
+- name: ha-data
+  accessmode: ReadWriteOncePod
+  request: 150Gi
+  annotations:
+    argocd.argoproj.io/sync-options: "Prune=false"
+
+terminationGracePeriodSeconds: 50
+
+securityContext:
+  privileged: true
+  allowPrivilegeEscalation: true
+  runAsNonRoot: false
+  readOnlyRootFilesystem: false
+  capabilities:
+      drop:
+      - ALL
+      add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_ADMIN
+  
+podSecurityContext:
+  runAsUser: 0
+  runAsGroup: 0
+  fsGroup: 0
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node.io/role
+            operator: In
+            values:
+            - core

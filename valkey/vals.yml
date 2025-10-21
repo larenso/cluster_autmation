@@ -3,7 +3,7 @@ fullnameOverride: valkey
 
 image:
   repository: valkey/valkey
-  tag: 8.1.4-alpine3.22
+  tag: latest
 
 service:
   ports:
@@ -11,8 +11,8 @@ service:
       name: valkey
 
 args: 
-  - "valkey-server"
-  - "/etc/valkey/valkey.conf"
+- "valkey-server"
+- "/etc/valkey/valkey.conf"
 livenessProbe:
   exec:
     command:
@@ -40,11 +40,11 @@ resources:
     memory: 128Mi
 
 volumeMounts:
-  - name: valkey-vol
-    mountPath: "/etc/valkey/"
-    readOnly: true
-  - name: valkey-data
-    mountPath: "/data/"
+- name: valkey-vol
+  mountPath: "/etc/valkey/"
+  readOnly: true
+- name: valkey-data
+  mountPath: "/data/"
 
 sidecars:
   redis-exporter:
@@ -65,30 +65,30 @@ sidecars:
         initialDelaySeconds: 10
         periodSeconds: 60
       args: 
-        - "-redis.password-file=/etc/valkey/auth.json"
-        - "--redis.user=monitoring"
-        - "-debug"
+      - "-redis.password-file=/etc/valkey/auth.json"
+      - "--redis.user=monitoring"
+      - "-debug"
       volumeMounts:
       - mountPath: "/etc/valkey/"
         name: valkey-exporter-vol
         readOnly: true
 
 volumes:
-  - name: valkey-vol
-    secret:
-      secretName: valkey
-  - name: valkey-exporter-vol
-    secret:
-      secretName: valkey-exporter
-  - name: valkey-data
-    persistentVolumeClaim:
-      claimName: valkey-data
+- name: valkey-vol
+  secret:
+    secretName: valkey
+- name: valkey-exporter-vol
+  secret:
+    secretName: valkey-exporter
+- name: valkey-data
+  persistentVolumeClaim:
+    claimName: valkey-data
 
 persistentVolumeClaimData:
-  - name: valkey-data
-    accessmode: ReadWriteOncePod
-    annotations:
-      argocd.argoproj.io/sync-options: "Prune=false"
+- name: valkey-data
+  accessmode: ReadWriteOncePod
+  annotations:
+    argocd.argoproj.io/sync-options: "Prune=false"
 
 serviceMonitor:
   enabled: true

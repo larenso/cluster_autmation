@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	"errors"
 	"fmt"
+	"larenso/cluster_autmation/porkbun/dnsjob"
 	"larenso/cluster_autmation/porkbun/lib"
 	"net"
 	"net/http"
@@ -24,6 +25,7 @@ import (
 )
 
 var GroupName = os.Getenv("GROUP_NAME")
+var runJob = os.Getenv("RUN_JOB")
 
 const DefaultTTL = "300"
 const DefaultBaseURL = "https://api.porkbun.com/api/json/v3/"
@@ -36,8 +38,16 @@ func main() {
 	cmd.RunWebhookServer(GroupName, &PorkbunSolver{})
 }
 
+func envGetOrPanic(env string) string {
+	res := os.Getenv(env)
+	if res == "" {
+		panic(env + " must be specified")
+	}
+	return res
+}
+
 type Config struct {
-	ApiKeySecretRef    corev1.SecretKeySelector `json:"apiKeySecretRef"`
+	APIKeySecretRef    corev1.SecretKeySelector `json:"apiKeySecretRef"`
 	SecretKeySecretRef corev1.SecretKeySelector `json:"secretKeySecretRef"`
 	Namespace          string                   `json:"namespace"`
 }
@@ -49,7 +59,7 @@ type PorkbunSolver struct {
 	renewSecret bool
 }
 
-func (e *PorkbunSolver) cancellableTimeoutContext() (context.Context, context.CancelFunc) {
+func (ps *PorkbunSolver) cancellableTimeoutContext() (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	go func() {
@@ -57,7 +67,7 @@ func (e *PorkbunSolver) cancellableTimeoutContext() (context.Context, context.Ca
 			select {
 			case <-ctx.Done():
 				return
-			case <-e.stopCh:
+			case <-ps.stopCh:
 				cancel()
 			}
 		}
@@ -66,45 +76,44 @@ func (e *PorkbunSolver) cancellableTimeoutContext() (context.Context, context.Ca
 	return ctx, cancel
 }
 
-func (e *PorkbunSolver) updateSecrets(ch *acme.ChallengeRequest) (err error) {
-	if !e.renewSecret {
-		return
+func (ps *PorkbunSolver) updateSecrets(ch *acme.ChallengeRequest) error {
+	if !ps.renewSecret {
+		return nil
 	}
 
 	config := Config{}
 
 	if ch.Config == nil {
-		err = errors.New("Request challange is nil")
-		return
+		return errors.New("request challange is nil")
 	}
-	if err = json.Unmarshal(ch.Config.Raw, &config); err != nil {
-		err = fmt.Errorf("Config error: %w", err)
-		return
+	if err := json.Unmarshal(ch.Config.Raw, &config); err != nil {
+		return fmt.Errorf("config error: %w", err)
 	}
 
-	if e.pbClient.ApiKey, err = e.readSecret(config.ApiKeySecretRef, config.Namespace); err != nil {
-		return
+	var err error
+	if ps.pbClient.APIKey, err = ps.readSecret(config.APIKeySecretRef, config.Namespace); err != nil {
+		return err
 	}
-	if e.pbClient.Secret, err = e.readSecret(config.SecretKeySecretRef, config.Namespace); err != nil {
-		return
+	if ps.pbClient.Secret, err = ps.readSecret(config.SecretKeySecretRef, config.Namespace); err != nil {
+		return err
 	}
 
-	e.renewSecret = false
-	return
+	ps.renewSecret = false
+	return err
 }
 
-func (e *PorkbunSolver) readSecret(s corev1.SecretKeySelector, n string) (string, error) {
-	ctx, cancel := e.cancellableTimeoutContext()
+func (ps *PorkbunSolver) readSecret(s corev1.SecretKeySelector, n string) (string, error) {
+	ctx, cancel := ps.cancellableTimeoutContext()
 	defer cancel()
 
-	secret, err := e.client.CoreV1().Secrets(n).Get(ctx, s.Name, metav1.GetOptions{})
+	secret, err := ps.client.CoreV1().Secrets(n).Get(ctx, s.Name, metav1.GetOptions{})
 	if err != nil {
-		return "", fmt.Errorf("Get error for secret %q %q: %w", n, s.Name, err)
+		return "", fmt.Errorf("get error for secret %q %q: %w", n, s.Name, err)
 	}
 
 	bytes, ok := secret.Data[s.Key]
 	if !ok {
-		return "", fmt.Errorf("Secret %q %q does not contain key %q: %w", n, s.Name, s.Key, err)
+		return "", fmt.Errorf("secret %q %q does not contain key %q: %w", n, s.Name, s.Key, err)
 	}
 
 	dst := make([]byte, base64.StdEncoding.DecodedLen(len(bytes)))
@@ -118,13 +127,12 @@ func (e *PorkbunSolver) readSecret(s corev1.SecretKeySelector, n string) (string
 	return string(dst[:pos]), nil
 }
 
-func (e *PorkbunSolver) Name() string {
+func (ps *PorkbunSolver) Name() string {
 	return "porkbun"
 }
 
-func (e *PorkbunSolver) Present(ch *acme.ChallengeRequest) error {
-
-	if err := e.updateSecrets(ch); err != nil {
+func (ps *PorkbunSolver) Present(ch *acme.ChallengeRequest) error {
+	if err := ps.updateSecrets(ch); err != nil {
 		return err
 	}
 
@@ -132,12 +140,12 @@ func (e *PorkbunSolver) Present(ch *acme.ChallengeRequest) error {
 	entity := strings.TrimSuffix(ch.ResolvedFQDN, "."+ch.ResolvedZone)
 	name := strings.TrimSuffix(ch.ResolvedFQDN, ".")
 
-	ctx, cancel := e.cancellableTimeoutContext()
+	ctx, cancel := ps.cancellableTimeoutContext()
 	defer cancel()
 
-	records, err := e.pbClient.ListRecords(ctx, domain)
+	records, err := ps.pbClient.ListRecords(ctx, domain)
 	if err != nil {
-		e.renewSecret = true
+		ps.renewSecret = true
 		return err
 	}
 
@@ -148,10 +156,10 @@ func (e *PorkbunSolver) Present(ch *acme.ChallengeRequest) error {
 		}
 	}
 
-	ctx, cancel = e.cancellableTimeoutContext()
+	ctx, cancel = ps.cancellableTimeoutContext()
 	defer cancel()
 
-	err = e.pbClient.Create(ctx, domain, &lib.Record{
+	err = ps.pbClient.Create(ctx, domain, &lib.Record{
 		Name:    entity,
 		Type:    "TXT",
 		Content: ch.Key,
@@ -167,22 +175,21 @@ func (e *PorkbunSolver) Present(ch *acme.ChallengeRequest) error {
 // value provided on the ChallengeRequest should be cleaned up.
 // This is in order to facilitate multiple DNS validations for the same domain
 // concurrently.
-func (e *PorkbunSolver) CleanUp(ch *acme.ChallengeRequest) (err error) {
-
-	if err = e.updateSecrets(ch); err != nil {
-		return
+func (ps *PorkbunSolver) CleanUp(ch *acme.ChallengeRequest) error {
+	if err := ps.updateSecrets(ch); err != nil {
+		return err
 	}
 
 	domain := strings.TrimSuffix(ch.ResolvedZone, ".")
 	name := strings.TrimSuffix(ch.ResolvedFQDN, ".")
 
-	ctx, cancel := e.cancellableTimeoutContext()
+	ctx, cancel := ps.cancellableTimeoutContext()
 	defer cancel()
 
-	records, err := e.pbClient.ListRecords(ctx, domain)
-	if err != nil {
-		e.renewSecret = true
-		return err
+	records, errl := ps.pbClient.ListRecords(ctx, domain)
+	if errl != nil {
+		ps.renewSecret = true
+		return errl
 	}
 
 	for _, record := range records {
@@ -192,10 +199,7 @@ func (e *PorkbunSolver) CleanUp(ch *acme.ChallengeRequest) (err error) {
 				return err
 			}
 
-			ctx, cancel = e.cancellableTimeoutContext()
-			defer cancel()
-
-			if err := e.pbClient.Delete(ctx, domain, int(id)); err != nil {
+			if err = ps.pbClient.Delete(ctx, domain, int(id)); err != nil {
 				return err
 			}
 		}
@@ -212,12 +216,9 @@ func (e *PorkbunSolver) CleanUp(ch *acme.ChallengeRequest) (err error) {
 // provider accounts.
 // The stopCh can be used to handle early termination of the webhook, in cases
 // where a SIGTERM or similar signal is sent to the webhook process.
-func (c *PorkbunSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
-
-	var err error
-	var u *url.URL
-
-	if u, err = url.Parse(DefaultBaseURL); err != nil {
+func (ps *PorkbunSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
+	u, err := url.Parse(DefaultBaseURL)
+	if err != nil {
 		return err
 	}
 
@@ -234,9 +235,34 @@ func (c *PorkbunSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan 
 		},
 	}
 
-	c.pbClient = lib.NewPorkbunClient(cl, u)
-	c.client, err = kubernetes.NewForConfig(kubeClientConfig)
-	c.stopCh = stopCh
-	c.renewSecret = true
+	ps.pbClient = lib.NewPorkbunClient(cl, u)
+	ps.client, err = kubernetes.NewForConfig(kubeClientConfig)
+	ps.stopCh = stopCh
+	ps.renewSecret = true
+
+	// run job
+	if runJob != "" {
+		return startSideJob(stopCh)
+	}
+
 	return err
+}
+
+func startSideJob(stopCh <-chan struct{}) error {
+	env := dnsjob.EnvVars{
+		Namespace:  envGetOrPanic("NAMESPACE"),
+		PbKey:      envGetOrPanic("PB_API"),
+		PbSecret:   envGetOrPanic("PB_SECRET"),
+		Domains:    envGetOrPanic("DOMAINS"),
+		ConfMap:    "public-ip",
+		DNSRecheck: 10 * time.Minute,
+	}
+
+	job, err := dnsjob.New(&env)
+	if err != nil {
+		return err
+	}
+	go job.InitJobs(stopCh)
+
+	return nil
 }

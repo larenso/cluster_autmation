@@ -1,5 +1,5 @@
 {{- range $x := .Values.volumes }}
-{{- if $x.persistentVolumeClaim }}
+{{- if and $x.persistentVolumeClaim (not $.Values.stateful) }}
 {{- $obj := include "pichart.findNameInArray" (dict "array" $.Values.persistentVolumeClaimData "keyword" $x.name) | fromYaml }}
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -1,9 +1,5 @@
 package lib
 
-const success = "SUCCESS"
-
-type apiRequest interface{}
-
 type authRequest struct {
 	APIKey       string `json:"apikey"`
 	SecretAPIKey string `json:"secretapikey"`
@@ -32,10 +28,12 @@ type Status struct {
 
 type recordCreateResp struct {
 	Status
+
 	ID int `json:"id"`
 }
 
 type recordListResp struct {
 	Status
+
 	Records []Record `json:"records"`
 }

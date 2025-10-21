@@ -1,0 +1,75 @@
+nameOverride: ml
+fullnameOverride: ml
+
+image:
+  repository: ghcr.io/immich-app/immich-machine-learning
+  tag: "latest"
+
+service:
+  ports:
+  - port: 3003
+    name: http
+
+env:
+- name: IMMICH_PORT
+  value: "3003"
+- name: MPLCONFIGDIR
+  value: "/cache/matplotlib"
+
+livenessProbe:
+  httpGet:
+    path: /ping
+    port: 3003
+  initialDelaySeconds: 10
+  periodSeconds: 10
+readinessProbe:
+  httpGet:
+    path: /ping
+    port: 3003
+  initialDelaySeconds: 5
+  periodSeconds: 5
+resources:
+  limits:
+    cpu: '4'
+    memory: 7Gi
+  requests:
+    cpu: 50m
+    memory: 3Gi
+
+volumeMounts:
+- name: ml-cache
+  mountPath: "/cache"
+- name: tmp
+  mountPath: "/tmp"
+  
+volumes:
+- name: ml-cache
+  persistentVolumeClaim:
+    claimName: ml-cache
+- name: tmp
+  emptyDir:
+    sizeLimit: 50Gi
+
+persistentVolumeClaimData:
+- name: ml-cache
+  accessmode: ReadWriteOncePod
+  request: 50Gi
+  annotations:
+    argocd.argoproj.io/sync-options: "Prune=false"
+
+terminationGracePeriodSeconds: 15
+
+podSecurityContext:
+  runAsUser: 50006
+  runAsGroup: 50006
+  fsGroup: 50006
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node.io/role
+            operator: In
+            values:
+            - core

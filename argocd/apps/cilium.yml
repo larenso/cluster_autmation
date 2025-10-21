@@ -10,9 +10,12 @@ spec:
     namespace: cilium
     server: https://kubernetes.default.svc
   sources:
+  - repoURL: git@github.com:larenso/cluster_autmation.git
+    targetRevision: main
+    path: cilium
   - repoURL: https://helm.cilium.io/
     chart: cilium
-    targetRevision: 1.18.2
+    targetRevision: 1.18.3
     helm:
       valueFiles:
         - $vals/cilium/vals.yml
@@ -20,9 +23,6 @@ spec:
   - repoURL: git@github.com:larenso/cluster_autmation.git
     targetRevision: main
     ref: vals
-  - repoURL: git@github.com:larenso/cluster_autmation.git
-    targetRevision: main
-    path: cilium
   project: cluster
   syncPolicy:
     automated: null

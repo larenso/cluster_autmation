@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  namespace: apps
+  name: immich-route
+  labels:
+    app.kubernetes.io/name: immich-route
+    app.kubernetes.io/component: immich
+    app.kubernetes.io/part-of: immich
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hostnames:
+    - im.ebapeka.top
+  parentRefs:
+  - name: cluster-gateway
+    namespace: cilium
+    sectionName: public-https
+  rules:
+  - backendRefs:
+    - name: immich
+      kind: Service
+      port: 2283

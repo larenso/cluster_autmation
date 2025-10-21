@@ -1,0 +1,129 @@
+nameOverride: postgres
+fullnameOverride: postgres
+
+stateful: true
+
+image:
+  repository: tensorchord/vchord-postgres
+  tag: "latest"
+
+service:
+  ports:
+  - port: 5432
+    name: tcp
+
+args:
+- "-c"
+- "shared_preload_libraries=vchord.so"
+- "-c"
+- "max_connections=50"
+- "-c"
+- "max_wal_size=2GB"
+- "-c"
+- "shared_buffers=512MB"
+- "-c"
+- "wal_compression=lz4"
+- "-c"
+- "work_mem=6MB"
+- "-c"
+- "ssl=on"
+- "-c"
+- "ssl_ca_file=/etc/tls/ca.crt"
+- "-c"
+- "ssl_cert_file=/etc/tls/tls.crt"
+- "-c"
+- "ssl_key_file=/etc/tls/tls.key"
+- "-c"
+- "ssl_min_protocol_version=TLSv1.3"
+
+env:
+- name: POSTGRES_PASSWORD_FILE
+  value: /etc/pg-password
+- name: POSTGRES_DB
+  value: immich
+- name: POSTGRES_INITDB_ARGS
+  value: --data-checksums
+- name: PGDATA
+  value: /data/pgdata
+
+livenessProbe:
+  exec:
+    command:
+    - pg_isready
+    - -d
+    - immich
+  initialDelaySeconds: 30
+  periodSeconds: 60
+readinessProbe:
+  exec:
+    command:
+    - pg_isready
+    - -d
+    - immich
+  initialDelaySeconds: 30
+  periodSeconds: 10
+resources:
+  limits:
+    cpu: '2'
+    memory: 3Gi
+  requests:
+    cpu: 100m
+    memory: 2Gi
+
+volumeMounts:
+- name: postgres-data
+  mountPath: "/data"
+- name: postgres
+  mountPath: /etc/pg-password
+  subPath: pg-password
+  readOnly: true
+- name: postgres-tls
+  mountPath: /etc/tls
+  readOnly: true
+- name: postgres-run
+  mountPath: /var/run/postgresql
+- name: tmp
+  mountPath: /tmp
+  
+volumes:
+- name: postgres-data
+  persistentVolumeClaim:
+    claimName: postgres-data
+- name: postgres
+  secret:
+    secretName: postgres
+- name: postgres-tls
+  secret:
+    secretName: postgres-tls
+    defaultMode: 0600
+    optional: false
+- name: postgres-run
+  emptyDir:
+    sizeLimit: 5Gi
+- name: tmp
+  emptyDir:
+    sizeLimit: 5Gi
+
+persistentVolumeClaimData:
+- name: postgres-data
+  accessmode: ReadWriteOncePod
+  request: 15Gi
+  annotations:
+    argocd.argoproj.io/sync-options: "Prune=false"
+
+terminationGracePeriodSeconds: 50
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node.io/role
+            operator: In
+            values:
+            - core

@@ -13,7 +13,7 @@ kubelet:
 kubeControllerManager:
   enabled: false
 coreDns:
-  enabled: true
+  enabled: false
 kubeEtcd:
   enabled: false
 kubeScheduler:
@@ -149,12 +149,12 @@ alertmanager:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 5Gi
+              storage: 256Mi
 
     resources:
       limits:
-        cpu: 200m
-        memory: 64Mi
+        cpu: 100m
+        memory: 32Mi
       requests:
         cpu: 10m
         memory: 32Mi
@@ -173,31 +173,31 @@ grafana:
   networkPolicy:
     enabled: false
 
-  # persistent volumes related
   initChownData:
     enabled: false
   sidecar:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 10m
-        memory: 128Mi
-    # skipTlsVerify: true
     dashboards:
-      enabled: true
-      env: {
-        REQ_SKIP_TLS_VERIFY: true
-      }
-      resource: configmap
-      reloadURL: "https://localhost:3000/api/admin/provisioning/dashboards/reload"
+      enabled: false
     datasources:
       enabled: false
       
   defaultDashboardsTimezone: CET
   defaultDashboardsInterval: 5m
 
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: true
+        editable: false
+        options:
+          path: /var/lib/grafana/dashboards/default
+  dashboardsConfigMaps:
+    default: "grafana-dashboards"
 
   datasources:
     datasources.yaml:
@@ -233,7 +233,7 @@ grafana:
     enabled: true
     scheme: https
     tlsConfig:
-      insecureSkipVerify: true 
+      insecureSkipVerify: true
 
   securityContext:
     runAsUser: 50005
@@ -309,11 +309,7 @@ prometheusOperator:
         group: cert-manager.io
         kind: ClusterIssuer
         
-  # todo ???
   namespaces: {}
-    # releaseNamespace: true
-    # additional:
-    # - kube-system
   denyNamespaces: []
   alertmanagerInstanceNamespaces: []
   alertmanagerConfigNamespaces: []
@@ -421,9 +417,9 @@ prometheus:
     resources:
       limits:
         cpu: 500m
-        memory: 256Mi
+        memory: 512Mi
       requests:
-        cpu: 100m
+        cpu: 50m
         memory: 256Mi
 
     retention: 60d
