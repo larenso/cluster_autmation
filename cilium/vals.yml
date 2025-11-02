@@ -77,6 +77,12 @@ tls:
   secretSync:
     enabled: true
 
+enableLBIPAM: false
+certgen:
+  generateCA: false
+sysctlfix:
+  enabled: false
+
 authentication:
   enabled: true
 #   mutual:
@@ -164,12 +170,6 @@ hubble:
         name: cluster-private
         group: cert-manager.io
         kind: ClusterIssuer
-
-enableLBIPAM: false
-certgen:
-  generateCA: false
-sysctlfix:
-  enabled: false
 
 cgroup:
   autoMount:

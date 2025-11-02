@@ -9,7 +9,7 @@ resources:
 - route.yml
 
 configMapGenerator:
-- name: dashboards
+- name: grafana-dashboards
   files:
   - dashboards/alert-manager.json
   - dashboards/cert-manager.json
@@ -33,3 +33,5 @@ configMapGenerator:
   - dashboards/prometheus.json
   - dashboards/redis.json
   - dashboards/workload.json
+generatorOptions:
+  disableNameSuffixHash: true

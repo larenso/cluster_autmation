@@ -19,9 +19,9 @@ spec:
     helm:
       valueFiles:
         - $vals/immich/postgres.yml
-      valuesInline:
-        image:
-          tag: "pg17-v0.4.3"
+      parameters:
+      - name: "image.tag"
+        value: "pg17-v0.4.3"
   - repoURL: git@github.com:larenso/cluster_autmation.git
     targetRevision: main
     ref: vals

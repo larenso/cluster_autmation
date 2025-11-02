@@ -16,9 +16,9 @@ spec:
     helm:
       valueFiles:
         - $vals/immich/immich.yml
-      valuesInline:
-        image:
-          tag: "v2.2.1"
+      parameters:
+      - name: "image.tag"
+        value: "v2.2.1"
   - repoURL: git@github.com:larenso/cluster_autmation.git
     targetRevision: main
     ref: vals

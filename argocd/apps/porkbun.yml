@@ -16,9 +16,9 @@ spec:
     helm:
       valueFiles:
         - $vals/cert-manager/porkbun.yml
-      valuesInline:
-        image:
-          tag: "0.5-alpine3.22"
+      parameters:
+      - name: "image.tag"
+        value: "0.5-alpine3.22"
   - repoURL: git@github.com:larenso/cluster_autmation.git
     targetRevision: main
     ref: vals

@@ -16,9 +16,9 @@ spec:
     helm:
       valueFiles:
         - $vals/valkey/vals.yml
-      valuesInline:
-        image:
-          tag: 8.1.4-alpine3.22
+      parameters:
+      - name: "image.tag"
+        value: "8.1.4-alpine3.22"
   - repoURL: git@github.com:larenso/cluster_autmation.git
     targetRevision: main
     ref: vals

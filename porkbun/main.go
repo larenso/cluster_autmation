@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
 	json "encoding/json"
 	"errors"
 	"fmt"
@@ -116,15 +115,7 @@ func (ps *PorkbunSolver) readSecret(s corev1.SecretKeySelector, n string) (strin
 		return "", fmt.Errorf("secret %q %q does not contain key %q: %w", n, s.Name, s.Key, err)
 	}
 
-	dst := make([]byte, base64.StdEncoding.DecodedLen(len(bytes)))
-
-	var pos int
-	pos, err = base64.StdEncoding.Decode(dst, bytes)
-	if err != nil {
-		return "", err
-	}
-
-	return string(dst[:pos]), nil
+	return string(bytes), nil
 }
 
 func (ps *PorkbunSolver) Name() string {

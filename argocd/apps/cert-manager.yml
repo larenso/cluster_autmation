@@ -28,3 +28,9 @@ spec:
     syncOptions:
     - RespectIgnoreDifferences=true
     - ApplyOutOfSyncOnly=true
+  ignoreDifferences:
+  - group: ""
+    kind: ConfigMap
+    jqPathExpressions:
+      - .data.ip
+  

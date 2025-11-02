@@ -1,5 +1,5 @@
 rm -rf /etc/rancher/node
-mkdir /etc/rancher/k3s
+mkdir -p /etc/rancher/k3s
 
 cp /etc/rancher/config.yaml /etc/rancher/k3s/config.yaml
 

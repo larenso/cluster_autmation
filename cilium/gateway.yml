@@ -25,7 +25,7 @@ spec:
   - name: public-https
     hostname: "*.ebapeka.top"
     protocol: HTTPS
-    port: 8443
+    port: 8334
     tls:
       mode: Terminate
       certificateRefs:
