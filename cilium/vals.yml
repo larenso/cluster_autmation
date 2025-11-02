@@ -26,7 +26,6 @@ directRoutingSkipUnreachable: false
 ipv4NativeRoutingCIDR: 10.100.0.0/16
 ipv6NativeRoutingCIDR: 2a02:ed02:a201:4e00:d1ce::0/112
 enableIPv6Masquerade: false
-devices: wlan0
 
 kubeProxyReplacement: true
 bpf:
@@ -136,7 +135,7 @@ envoy:
   resources:
     limits:
       cpu: 300m
-      memory: 64Mi
+      memory: 256Mi
     requests:
       cpu: 20m
       memory: 32Mi

@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/component: cilium-gateway
     app.kubernetes.io/part-of: cilium
     app.kubernetes.io/managed-by: kustomize
+  annotations:
+    argocd.argoproj.io/ignore-healthcheck: "true"
 spec:
   gatewayClassName: cilium
   listeners:

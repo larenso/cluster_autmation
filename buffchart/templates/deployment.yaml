@@ -42,7 +42,7 @@ spec:
       maxSurge: {{ .maxSurge | default 1 }}
       maxUnavailable: {{ .maxSurge | default 1 }}
   {{- end }}
-  {{- else }}
+  {{- else if not .Values.stateful }}
   strategy: 
     type: Recreate
   {{- end }}
