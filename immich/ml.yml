@@ -15,26 +15,28 @@ env:
   value: "3003"
 - name: MPLCONFIGDIR
   value: "/cache/matplotlib"
+- name: HF_XET_CACHE
+  value: "/cache/huggingface-xet"
 
 livenessProbe:
   httpGet:
     path: /ping
     port: 3003
-  initialDelaySeconds: 10
-  periodSeconds: 10
+  initialDelaySeconds: 100
+  periodSeconds: 500
 readinessProbe:
   httpGet:
     path: /ping
     port: 3003
-  initialDelaySeconds: 5
-  periodSeconds: 5
+  initialDelaySeconds: 10
+  periodSeconds: 10
 resources:
   limits:
     cpu: '4'
     memory: 7Gi
   requests:
     cpu: 50m
-    memory: 3Gi
+    memory: 512Mi
 
 volumeMounts:
 - name: ml-cache
