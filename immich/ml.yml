@@ -32,8 +32,8 @@ readinessProbe:
   periodSeconds: 10
 resources:
   limits:
-    cpu: '4'
-    memory: 7Gi
+    cpu: "3.5"
+    memory: 3328Mi
   requests:
     cpu: 50m
     memory: 512Mi

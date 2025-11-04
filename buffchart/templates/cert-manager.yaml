@@ -91,7 +91,7 @@ rules:
   resources:
   - '*'
   verbs:
-  - 'create'
+  - "create"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

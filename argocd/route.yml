@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
 spec:
   hostnames:
-    - argo.localhost
+    - argo.local
   parentRefs:
   - name: cluster-gateway
     namespace: cilium

@@ -33,11 +33,11 @@ readinessProbe:
   periodSeconds: 5
 resources:
   limits:
-    cpu: '1'
-    memory: 512Mi
+    cpu: "1"
+    memory: 64Mi
   requests:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 50m
+    memory: 64Mi
 
 volumeMounts:
 - name: valkey-vol
@@ -53,8 +53,8 @@ sidecars:
     params:
       resources:
         requests:
-          cpu: 100m
-          memory: 32Mi
+          cpu: 10m
+          memory: 16Mi
       ports:
         - containerPort: 9121
           name: http

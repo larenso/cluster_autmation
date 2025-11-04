@@ -13,7 +13,7 @@ spec:
   gatewayClassName: cilium
   listeners:
   - name: private-passthrough
-    hostname: "*.localhost"
+    hostname: "*.local"
     protocol: TLS
     port: 3000
     tls:

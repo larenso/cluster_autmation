@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
 spec:
   hostnames:
-    - grafana.localhost
+    - grafana.local
   parentRefs:
   - name: cluster-gateway
     namespace: cilium

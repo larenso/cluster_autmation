@@ -64,11 +64,11 @@ readinessProbe:
   periodSeconds: 10
 resources:
   limits:
-    cpu: '2'
+    cpu: "2"
     memory: 3Gi
   requests:
     cpu: 100m
-    memory: 2Gi
+    memory: 2304Mi
 
 volumeMounts:
 - name: postgres-data

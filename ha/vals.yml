@@ -31,7 +31,7 @@ readinessProbe:
   periodSeconds: 5
 resources:
   limits:
-    cpu: '1'
+    cpu: "1"
     memory: 640Mi
   requests:
     cpu: 50m

@@ -15,8 +15,15 @@ spec:
   - name: cluster-gateway
     namespace: cilium
     sectionName: public-https
-  rules:
-  - backendRefs:
+  rules:  
+  - matches:
+    - headers:
+      - name: "x-client-user"
+        value: "larry"
+    - headers:
+      - name: "x-client-user"
+        value: "alina"
+    backendRefs:
     - name: immich
       kind: Service
       port: 2283
