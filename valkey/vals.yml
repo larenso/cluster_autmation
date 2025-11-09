@@ -52,7 +52,7 @@ sidecars:
     tag: v1.78.0-alpine
     params:
       resources:
-        requests:
+        limits:
           cpu: 10m
           memory: 16Mi
       ports:
@@ -67,7 +67,6 @@ sidecars:
       args: 
       - "-redis.password-file=/etc/valkey/auth.json"
       - "--redis.user=monitoring"
-      - "-debug"
       volumeMounts:
       - mountPath: "/etc/valkey/"
         name: valkey-exporter-vol

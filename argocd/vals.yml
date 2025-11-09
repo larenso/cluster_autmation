@@ -143,31 +143,6 @@ server:
     enabled: true
     serviceMonitor:
       enabled: false
-  # httproute:
-  #   enabled: true
-    # parentRefs: 
-    #   - name: cluster-gateway
-    #     namespace: cilium
-    #     # sectionName: https
-    # hostnames:
-    #   - "argo.localhost"
-    # rules:
-    #   - matches:
-    #       - path:
-    #           type: PathPrefix
-    #           value: /
-  
-  # backendTLSPolicy:
-  #   enabled: true
-  #   targetRefs:
-  #   - kind: Service
-  #     name: argocd-server
-  #     sectionName: https
-  #   validation:
-  #     hostname: argocd-server.argocd.svc.cluster.local
-  #     caCertificateRefs:
-  #       - name: argocd-server-tls
-  #         kind: Secret
   resources:
    limits:
      cpu: 100m

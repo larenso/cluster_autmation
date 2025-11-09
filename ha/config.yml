@@ -24,3 +24,13 @@ data:
     automation: !include automations.yaml
     script: !include scripts.yaml
     scene: !include scenes.yaml
+    template:
+      - sensor:
+        - name: "Power Kitchen W"
+          unit_of_measurement: "W"
+          state: >
+            {% if states('sensor.power_kitchen') not in ['unknown', 'unavailable', 'none'] %}
+              {{ states('sensor.power_kitchen') | float * 1000 }}
+            {% else %}
+              unknown
+            {% endif %}
