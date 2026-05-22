@@ -27,7 +27,7 @@ defaultRules:
   rules:
     alertmanager: true
     etcd: false
-    configReloaders: true
+    configReloaders: false
     general: true
     k8sContainerCpuUsageSecondsTotal: true
     k8sContainerMemoryCache: true
@@ -161,7 +161,7 @@ alertmanager:
 
 
 grafana:
-  enabled: true
+  enabled: false
   prune: false
   replicas: 1
   revisionHistoryLimit: 2
@@ -203,10 +203,10 @@ grafana:
     datasources.yaml:
       apiVersion: 1
       datasources:
-      - name: "Prometheus"
+      - name: Prometheus
         type: prometheus
         uid: prometheus
-        url: http://monitoring-kube-prometheus-prometheus.monitoring:9090/
+        url: http://kube-prometheus-stack-prometheus.monitoring:9090/
         access: proxy
         isDefault: true
         jsonData:
@@ -215,7 +215,7 @@ grafana:
       - name: "Alertmanager"
         type: alertmanager
         uid: alertmanager
-        url: http://monitoring-kube-prometheus-alertmanager.monitoring:9093/
+        url: http://kube-prometheus-stack-alertmanager.monitoring:9093/
         access: proxy
         jsonData:
           handleGrafanaManagedAlerts: false
@@ -231,27 +231,16 @@ grafana:
 
   serviceMonitor:
     enabled: true
-    scheme: https
-    tlsConfig:
-      insecureSkipVerify: true
 
   securityContext:
     runAsUser: 50005
     runAsGroup: 50005
     fsGroup: 50005
 
-  adminUser: ""
-  adminPassword: ""
   admin:
     existingSecret: grafana-secret
     userKey: admin-user
     passwordKey: admin-password
-
-  extraSecretMounts:
-  - name: grafana-tls
-    mountPath: /tls/
-    secretName: grafana-tls
-    readOnly: true
 
   grafana.ini:
     log:
@@ -259,18 +248,9 @@ grafana:
     analytics:
       check_for_updates: false
     server:
-      cert_key: /tls/tls.key
-      cert_file: /tls/tls.crt
-      protocol: https
-
-
-  readinessProbe:
-    httpGet:
-      scheme: HTTPS
-
-  livenessProbe:
-    httpGet:
-      scheme: HTTPS
+      protocol: http
+    unified_alerting:
+      enabled: false
 
   affinity:
     nodeAffinity:
@@ -285,7 +265,7 @@ grafana:
   resources:
     limits:
       cpu: 500m
-      memory: 256Mi
+      memory: 384Mi
     requests:
       cpu: 10m
       memory: 128Mi
@@ -370,6 +350,7 @@ prometheus:
 
     web: {}
     serviceDiscoveryRole: "EndpointSlice"
+    scrapeNativeHistograms: true
     podMonitorSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false
 
@@ -377,15 +358,12 @@ prometheus:
     enableFeatures:
     - promql-duration-expr
     - native-histograms
-    - created-timestamp-zero-ingestion
-    - exemplar-storage
-    # - otlp-native-delta-ingestion
-    # - otlp-deltatocumulative
+    - st-storage
+    # - exemplar-storage
     - use-uncached-io
 
     tracingConfig: {}
     # enableOTLPReceiver: true
-
     # exemplars:
     #   maxSize: 100000
 
@@ -422,8 +400,8 @@ prometheus:
         cpu: 50m
         memory: 256Mi
 
-    retention: 60d
-    retentionSize: "47GiB"
+    retention: 30d
+    retentionSize: "50GiB"
 
     persistentVolumeClaimRetentionPolicy:
       whenDeleted: Delete
@@ -434,4 +412,4 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 50Gi
+              storage: 52Gi

@@ -3,7 +3,7 @@ fullnameOverride: ha
 
 image:
   repository: ghcr.io/home-assistant/home-assistant
-  tag: "2025.10"
+  tag: "latest"
 
 service:
   ports:
@@ -31,11 +31,11 @@ readinessProbe:
   periodSeconds: 5
 resources:
   limits:
-    cpu: "1"
-    memory: 640Mi
+    cpu: 500m
+    memory: 512Mi
   requests:
     cpu: 50m
-    memory: 512Mi
+    memory: 384Mi
 
 volumeMounts:
 - name: ha-data
@@ -44,7 +44,7 @@ volumeMounts:
 - name: usb-zigbee
   mountPath: /dev/ttyUSB0
 - name: config-volume
-  mountPath: /configuration.yaml
+  mountPath: /config/configuration.yaml
   subPath: configuration.yaml
   readOnly: true
   

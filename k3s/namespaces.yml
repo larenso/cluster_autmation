@@ -19,25 +19,6 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: valkey
-  labels:
-    app.kubernetes.io/name: valkey
-    app.kubernetes.io/part-of: valkey
-    app.kubernetes.io/managed-by: kustomize
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: argocd
-  labels:
-    app.kubernetes.io/name: argocd
-    app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/managed-by: kustomize
-    gateway-listener.kubernetes.io/access-mode: private
----
-apiVersion: v1
-kind: Namespace
-metadata:
   name: monitoring
   labels:
     app.kubernetes.io/managed-by: kustomize

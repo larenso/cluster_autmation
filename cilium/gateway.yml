@@ -12,12 +12,16 @@ metadata:
 spec:
   gatewayClassName: cilium
   listeners:
-  - name: private-passthrough
+  - name: private-https
     hostname: "*.local"
-    protocol: TLS
+    protocol: HTTPS
     port: 3000
     tls:
-      mode: Passthrough
+      mode: Terminate
+      certificateRefs:
+      - kind: Secret
+        name: private-cert-tls
+        group: ''
     allowedRoutes:
       namespaces:
         from: Selector

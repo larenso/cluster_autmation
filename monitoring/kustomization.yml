@@ -5,7 +5,6 @@ metadata:
   name: monitoring-resources
 
 resources:
-- certificate.yml
 - route.yml
 
 configMapGenerator:

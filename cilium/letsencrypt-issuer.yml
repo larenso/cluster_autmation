@@ -50,3 +50,26 @@ spec:
   dnsNames:
     - "ebapeka.top"
     - "*.ebapeka.top"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: private-cert-tls
+  namespace: cilium
+  labels:
+    app.kubernetes.io/component: cilium-gateway
+    app.kubernetes.io/part-of: cluster
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  secretName: private-cert-tls
+  dnsNames:
+    - "*.local"
+  duration: 2160h # 90d
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: cluster-private
+  privateKey:
+    algorithm: RSA
+    rotationPolicy: "Always"
+  renewBefore: 360h # 15d

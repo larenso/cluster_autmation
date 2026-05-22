@@ -65,7 +65,7 @@ readinessProbe:
 resources:
   limits:
     cpu: "2"
-    memory: 3Gi
+    memory: 2Gi
   requests:
     cpu: 100m
     memory: 1536Mi
@@ -107,7 +107,7 @@ volumes:
 persistentVolumeClaimData:
 - name: postgres-data
   accessmode: ReadWriteOncePod
-  request: 15Gi
+  request: 50Gi
   annotations:
     argocd.argoproj.io/sync-options: "Prune=false"
 

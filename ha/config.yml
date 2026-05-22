@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/part-of: ha
     app.kubernetes.io/managed-by: kustomize
 data:
-  configuration.yaml: >-
+  configuration.yaml: |-
     # Loads default set of integrations. Do not remove.
     default_config:
     http:
@@ -18,19 +18,8 @@ data:
       trusted_proxies:
         - 10.100.0.0/16
         - 10.101.0.0/16
-    # Load frontend themes from the themes folder
-    frontend:
-      themes: !include_dir_merge_named themes
+    #frontend:
+    #  themes: !include_dir_merge_named themes
     automation: !include automations.yaml
-    script: !include scripts.yaml
-    scene: !include scenes.yaml
-    template:
-      - sensor:
-        - name: "Power Kitchen W"
-          unit_of_measurement: "W"
-          state: >
-            {% if states('sensor.power_kitchen') not in ['unknown', 'unavailable', 'none'] %}
-              {{ states('sensor.power_kitchen') | float * 1000 }}
-            {% else %}
-              unknown
-            {% endif %}
+    #script: !include scripts.yaml
+    #scene: !include scenes.yaml

@@ -5,21 +5,12 @@ metadata:
   name: bootstrup
 
 resources:
-- k3s/namespaces.yml
 # crds
-- crds/gateway-api-v1.4.yml
-- crds/gateway-api-experiment-v1.4.yml
-- crds/cert-manager-v1.9.1.yml
-- crds/argocd-v9.0.5.yml
+- crds/gateway-api-1.4.yml
+- crds/cert-manager.yml
+
+- k3s/namespaces.yml
 # secrets
-- argocd/secret.yml
 - cert-manager/secret.yml
 - monitoring/secret.yml
 - immich/secret.yml
-- valkey/secret.yml
-# argo
-- argocd/route.yml
-- argocd/projects.yml
-- argocd/apps/argo.yml
-- cilium/gateway.yml
-- cert-manager/issuer.yml

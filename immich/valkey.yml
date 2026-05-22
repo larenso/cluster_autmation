@@ -3,7 +3,7 @@ fullnameOverride: valkey
 
 image:
   repository: valkey/valkey
-  tag: latest
+  tag: "latest"
 
 service:
   ports:
@@ -44,16 +44,16 @@ volumeMounts:
   mountPath: "/etc/valkey/"
   readOnly: true
 - name: valkey-data
-  mountPath: "/data/"
+  mountPath: "/data"
 
 sidecars:
   redis-exporter:
     image: oliver006/redis_exporter
-    tag: v1.78.0-alpine
+    tag: "latest"
     params:
       resources:
         limits:
-          cpu: 10m
+          cpu: 20m
           memory: 16Mi
       ports:
         - containerPort: 9121
@@ -75,19 +75,13 @@ sidecars:
 volumes:
 - name: valkey-vol
   secret:
-    secretName: valkey
+    secretName: valkey-vol
 - name: valkey-exporter-vol
   secret:
     secretName: valkey-exporter
 - name: valkey-data
-  persistentVolumeClaim:
-    claimName: valkey-data
-
-persistentVolumeClaimData:
-- name: valkey-data
-  accessmode: ReadWriteOncePod
-  annotations:
-    argocd.argoproj.io/sync-options: "Prune=false"
+  emptyDir:
+    sizeLimit: 15Gi
 
 serviceMonitor:
   enabled: true
@@ -97,7 +91,6 @@ serviceMonitor:
   matchLabels:
     app.kubernetes.io/instance: oliver006_redis_exporter
     app.kubernetes.io/name: valkey
-
 
 terminationGracePeriodSeconds: 20
 

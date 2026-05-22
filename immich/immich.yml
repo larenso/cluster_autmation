@@ -18,7 +18,7 @@ env:
 - name: DB_PASSWORD_FILE
   value: /secrets/db
 - name: REDIS_HOSTNAME
-  value: valkey.valkey.svc.cluster.local
+  value: valkey
 - name: REDIS_USERNAME
   valueFrom:
     secretKeyRef:
@@ -46,7 +46,7 @@ readinessProbe:
 resources:
   limits:
     cpu: "3"
-    memory: 3Gi
+    memory: 2Gi
   requests:
     cpu: "1"
     memory: 1Gi
