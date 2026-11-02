@@ -45,17 +45,17 @@ readinessProbe:
   periodSeconds: 5
 resources:
   limits:
-    cpu: "3"
-    memory: 2Gi
+    cpu: 2
+    memory: 2560Mi
   requests:
-    cpu: "1"
+    cpu: 500m
     memory: 1Gi
 
 volumeMounts:
 - name: immich-data
   mountPath: "/data"
-# - name: lib
-#   mountPath: "/lib"
+- name: library
+  mountPath: "/library"
 - name: db
   mountPath: /secrets/db
   subPath: db
@@ -69,10 +69,10 @@ volumes:
 - name: immich-data
   persistentVolumeClaim:
     claimName: immich-data
-# - name: lib
-#   hostPath:
-#     path: /mnt/data/library_cust
-#     type: DirectoryOrCreate
+- name: library
+  hostPath:
+    path: /mnt/data/library_cust
+    type: DirectoryOrCreate
 - name: db
   secret:
     secretName: postgres

@@ -19,13 +19,13 @@ env:
 
 livenessProbe:
   httpGet:
-    path: /manifest.json
+    path: /static/icons/favicon.ico
     port: 8123
   initialDelaySeconds: 10
   periodSeconds: 10
 readinessProbe:
   httpGet:
-    path: /manifest.json
+    path: /static/icons/favicon.ico
     port: 8123
   initialDelaySeconds: 5
   periodSeconds: 5

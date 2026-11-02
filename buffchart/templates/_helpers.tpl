@@ -44,6 +44,12 @@ app.kubernetes.io/version: {{ .Values.image.tag | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
+{{- define "pichart.labelsNoVersion" -}}
+helm.sh/chart: {{ include "pichart.chart" . }}
+{{ include "pichart.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
 {{/*
 Selector labels
 */}}

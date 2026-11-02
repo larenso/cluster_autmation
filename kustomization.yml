@@ -6,7 +6,7 @@ metadata:
 
 resources:
 # crds
-- crds/gateway-api-1.4.yml
+- crds/gateway-api-1.6.1.yml
 - crds/cert-manager.yml
 
 - k3s/namespaces.yml

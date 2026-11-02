@@ -3,6 +3,7 @@ disable:
   - traefik
   - servicelb
   - metrics-server
+  - gateway-api-crd
 # disable-cloud-controller: true
 disable-network-policy: true
 disable-kube-proxy: true

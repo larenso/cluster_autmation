@@ -1,3 +1,7 @@
 secret.yml
 secret.yaml
 /porkbun/porkbun
+
+.venv
+.env
+

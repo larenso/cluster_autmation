@@ -359,6 +359,7 @@ prometheus:
     - promql-duration-expr
     - native-histograms
     - st-storage
+    - xor2-encoding
     # - exemplar-storage
     - use-uncached-io
 
