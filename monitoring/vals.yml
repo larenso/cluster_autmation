@@ -109,7 +109,7 @@ kube-state-metrics:
       memory: 64Mi
 
 alertmanager:
-  enabled: true
+  enabled: true 
 
   networkPolicy:
     enabled: false
@@ -117,6 +117,9 @@ alertmanager:
   alertmanagerSpec:
     paused: false
     replicas: 1
+
+    configSecret: alertmanager-kps-slack
+    useExistingSecret: true     
 
     logFormat: json
     logLevel: info

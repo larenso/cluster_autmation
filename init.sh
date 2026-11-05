@@ -11,9 +11,9 @@ kubectl apply -k cert-manager
 kubectl apply -k monitoring -n monitoring --server-side
 helm install porkbun buffchart -n cert-manager -f cert-manager/porkbun.yml --set image.tag=0.7-alpine3.24
 sleep 5
-helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --version 92.16.2 -n monitoring -f monitoring/vals.yml --set prometheusOperator.admissionWebhooks.enabled=false
+helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --version 92.18.0 -n monitoring -f monitoring/vals.yml --set prometheusOperator.admissionWebhooks.enabled=false
 sleep 60
-helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack --version 92.16.2 -n monitoring -f monitoring/vals.yml
+helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack --version 92.18.0 -n monitoring -f monitoring/vals.yml
 sleep 60
 kubectl apply -k cilium
 kubectl apply -k ha

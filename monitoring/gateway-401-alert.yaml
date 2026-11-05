@@ -1,0 +1,37 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gateway-auth-failures
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: prometheus-operator
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: gateway.http-auth
+      interval: 30s
+      rules:
+        - alert: GatewayHighAuthenticationFailureRate
+          expr: |
+            sum by (envoy_cluster_name) (
+              increase(
+                envoy_cluster_upstream_rq{
+                  job="cilium-envoy",
+                  envoy_cluster_name=~"cilium/cilium-gateway-.*/.*",
+                  envoy_response_code="401"
+                }[1m]
+              )
+            ) > 3
+          for: 30s
+          labels:
+            severity: warning
+            service: gateway
+          annotations:
+            summary: "HTTP 401 spike on {{ $labels.envoy_cluster_name }}"
+            description: >-
+              {{ $labels.envoy_cluster_name }} returned {{ $value | printf "%.0f" }}
+              HTTP 401 responses in the last minute, above the threshold of 3, and
+              has stayed above it for a minute. Expired app-session tokens also
+              count here, so compare against the usual baseline before treating it
+              as a credential-stuffing attempt.
