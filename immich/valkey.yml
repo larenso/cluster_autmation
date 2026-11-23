@@ -34,10 +34,10 @@ readinessProbe:
 resources:
   limits:
     cpu: "1"
-    memory: 128Mi
+    memory: "128Mi"
   requests:
-    cpu: 50m
-    memory: 128Mi
+    cpu: "50m"
+    memory: "128Mi"
 
 volumeMounts:
 - name: valkey-vol
@@ -53,8 +53,8 @@ sidecars:
     params:
       resources:
         limits:
-          cpu: 20m
-          memory: 16Mi
+          cpu: "20m"
+          memory: "16Mi"
       ports:
         - containerPort: 9121
           name: http
@@ -87,7 +87,6 @@ serviceMonitor:
   enabled: true
   honorLabels: true
   port: http
-  path: /scrape
   matchLabels:
     app.kubernetes.io/instance: oliver006_redis_exporter
     app.kubernetes.io/name: valkey

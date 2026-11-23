@@ -1,4 +1,4 @@
-{{- if and .Values.serviceMonitor.enabled }}
+{{- if .Values.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -7,9 +7,12 @@ metadata:
     {{- include "pichart.labels" . | nindent 4 }}
 spec:
   endpoints:
-    - port: {{ .Values.serviceMonitor.port }}
+    - port: {{ required "serviceMonitor.port is required when serviceMonitor.enabled (an endpoint with no port scrapes every port of every matched Service)" .Values.serviceMonitor.port }}
       {{- with .Values.serviceMonitor.tlsConfig }}
       scheme: https
+      {{- with .Values.serviceMonitor.path }}
+      path: {{ . }}
+      {{- end }}
       tlsConfig: 
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -26,7 +29,7 @@ spec:
       metricRelabelings: {{- toYaml . | nindent 6 }}
       {{- end }}
       {{- range .Values.serviceMonitor.additionalEndpoints }}
-    - port: {{ .port }}
+    - port: {{ required "each serviceMonitor.additionalEndpoints entry requires port" .port }}
       {{- with .tlsConfig }}
       scheme: https
       tlsConfig: 
@@ -44,7 +47,7 @@ spec:
       {{- with .metricRelabelings }}
       metricRelabelings: {{- toYaml . | nindent 6 }}
       {{- end }}
-      {{- if .with }}
+      {{- with .path }}
       path: {{ . }}
       {{- end }}
       {{- if .params }}
@@ -69,5 +72,5 @@ spec:
   {{- end }}
   selector:
     matchLabels: 
-      {{- .Values.serviceMonitor.matchLabels | toYaml | nindent 6 }}
+      {{- required "serviceMonitor.matchLabels is required when serviceMonitor.enabled (an empty selector would match every Service in the namespace)" .Values.serviceMonitor.matchLabels | toYaml | nindent 6 }}
 {{- end }}

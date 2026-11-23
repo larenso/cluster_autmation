@@ -15,7 +15,6 @@ fullnameOverride: ""
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
   create: true
-  # Automatically mount a ServiceAccount's API credentials?
   automount: false
   annotations: {}
   name: ""
@@ -28,6 +27,8 @@ podSecurityContext:
   runAsUser: 50000
   runAsGroup: 50000
   fsGroup: 50000
+  seccompProfile:
+    type: RuntimeDefault
 
 securityContext:
   capabilities:

@@ -6,10 +6,20 @@ metadata:
     {{- include "pichart.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
+    # ArgoCD does not execute helm hooks and would apply this pod as a plain workload;
+    # Skip excludes it from sync/diff. `helm test <release>` still finds it via the release secret.
+    "argocd.argoproj.io/hook": Skip
 spec:
+  automountServiceAccountToken: false
+  # Inherit the release's own hardening so the hook survives PodSecurity `restricted`;
+  # -O /dev/null below because readOnlyRootFilesystem blocks wget's default index.html write.
+  securityContext:
+    {{- toYaml .Values.podSecurityContext | nindent 4 }}
   containers:
     - name: wget
-      image: busybox
+      image: busybox:1.38
       command: ['wget']
-      args: ['{{ include "pichart.fullname" . }}:{{ .Values.service.port }}']
+      args: ['-O', '/dev/null', '{{ include "pichart.fullname" . }}:{{ (first .Values.service.ports).port }}']
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
   restartPolicy: Never

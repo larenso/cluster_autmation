@@ -14,7 +14,7 @@ service:
 
 env:
 - name: DB_HOSTNAME
-  value: postgres
+  value: vchordpostgres
 - name: DB_PASSWORD_FILE
   value: /secrets/db
 - name: REDIS_HOSTNAME
@@ -45,11 +45,11 @@ readinessProbe:
   periodSeconds: 5
 resources:
   limits:
-    cpu: 2
-    memory: 2560Mi
+    cpu: "2"
+    memory: "2560Mi"
   requests:
-    cpu: 500m
-    memory: 1Gi
+    cpu: "500m"
+    memory: "1Gi"
 
 volumeMounts:
 - name: immich-data

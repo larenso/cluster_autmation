@@ -32,7 +32,7 @@ spec:
     rotationPolicy: "Always"
     algorithm: RSA
   issuerRef:
-    name: {{ .Values.certmanager.issuer }}
+    name: {{ required "certmanager.issuer is required when certmanager.groupName is set" .Values.certmanager.issuer }}
     kind: ClusterIssuer
     group: cert-manager.io
   dnsNames:

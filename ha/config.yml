@@ -9,10 +9,29 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
 data:
   configuration.yaml: |-
-    # Loads default set of integrations. Do not remove.
-    default_config:
-    #frontend:
-    #  themes: !include_dir_merge_named themes
+    # default_config:
+
     automation: !include automations.yaml
-    #script: !include scripts.yaml
-    #scene: !include scenes.yaml
+    # script: !include scripts.yaml
+    # scene: !include scenes.yaml
+
+    assist_pipeline:
+    conversation:
+    # dhcp:
+    # energy:
+    file:
+    go2rtc:
+    history:
+    homeassistant_alerts:
+    cloud:
+    logbook:
+    media_source:
+    mobile_app:
+    my:
+    # ssdp:
+    stream:
+    sun:
+    usage_prediction:
+    usb:
+    webhook:
+    # zeroconf:

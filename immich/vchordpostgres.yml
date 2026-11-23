@@ -1,10 +1,10 @@
-nameOverride: postgres
-fullnameOverride: postgres
+nameOverride: vchordpostgres
+fullnameOverride: vchordpostgres
 
 stateful: true
 
 image:
-  repository: tensorchord/vchord-postgres
+  repository: larenso/postgres
   tag: "latest"
 
 service:
@@ -65,13 +65,13 @@ readinessProbe:
 resources:
   limits:
     cpu: "2"
-    memory: 2Gi
+    memory: "2Gi"
   requests:
-    cpu: 100m
-    memory: 1536Mi
+    cpu: "100m"
+    memory: "1Gi"
 
 volumeMounts:
-- name: postgres-data
+- name: vchordpostgres-data
   mountPath: "/data"
 - name: postgres
   mountPath: /etc/pg-password
@@ -86,9 +86,9 @@ volumeMounts:
   mountPath: /tmp
   
 volumes:
-- name: postgres-data
+- name: vchordpostgres-data
   persistentVolumeClaim:
-    claimName: postgres-data
+    claimName: vchordpostgres-data
 - name: postgres
   secret:
     secretName: postgres
@@ -105,7 +105,7 @@ volumes:
     sizeLimit: 5Gi
 
 persistentVolumeClaimData:
-- name: postgres-data
+- name: vchordpostgres-data
   accessmode: ReadWriteOncePod
   request: 50Gi
   annotations:

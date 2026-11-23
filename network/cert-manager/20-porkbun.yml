@@ -1,0 +1,63 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+  labels:
+    network-policy-set: 20-porkbun
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: cert-manager
+  policyTypes: ["Ingress", "Egress"]
+  egress:
+    # ACME servers
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9402
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: porkbun-webhook
+  namespace: cert-manager
+  labels:
+    network-policy-set: 20-porkbun
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: porkbun
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cert-manager
+      ports:
+        - protocol: TCP
+          port: 443
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 192.168.1.0/24
+              - 10.100.0.0/15
+              - 169.254.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

@@ -7,30 +7,30 @@ metadata:
 resources:
 - route.yml
 
-configMapGenerator:
-- name: grafana-dashboards
-  files:
-  - dashboards/alert-manager.json
-  - dashboards/cert-manager.json
-  - dashboards/cilium-operator.json
-  - dashboards/cilium.json
-  - dashboards/cluster.json
-  - dashboards/core-dns.json
-  - dashboards/grafana-overview.json
-  - dashboards/kubelet.json
-  - dashboards/multicluster.json
-  - dashboards/namespace-pod.json
-  - dashboards/namespace-workload.json
-  - dashboards/net-cluster.json
-  - dashboards/net-namespace-pod.json
-  - dashboards/net-namespace-workload.json
-  - dashboards/net-pod.json
-  - dashboards/net-workload.json
-  - dashboards/node-pods.json
-  - dashboards/persistent-vols.json
-  - dashboards/pods.json
-  - dashboards/prometheus.json
-  - dashboards/redis.json
-  - dashboards/workload.json
-generatorOptions:
-  disableNameSuffixHash: true
+# configMapGenerator:
+# - name: grafana-dashboards
+#   files:
+#   - dashboards/alert-manager.json
+#   - dashboards/cert-manager.json
+#   - dashboards/cilium-operator.json
+#   - dashboards/cilium.json
+#   - dashboards/cluster.json
+#   - dashboards/core-dns.json
+#   - dashboards/grafana-overview.json
+#   - dashboards/kubelet.json
+#   - dashboards/multicluster.json
+#   - dashboards/namespace-pod.json
+#   - dashboards/namespace-workload.json
+#   - dashboards/net-cluster.json
+#   - dashboards/net-namespace-pod.json
+#   - dashboards/net-namespace-workload.json
+#   - dashboards/net-pod.json
+#   - dashboards/net-workload.json
+#   - dashboards/node-pods.json
+#   - dashboards/persistent-vols.json
+#   - dashboards/pods.json
+#   - dashboards/prometheus.json
+#   - dashboards/redis.json
+#   - dashboards/workload.json
+# generatorOptions:
+#   disableNameSuffixHash: true

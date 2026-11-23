@@ -32,11 +32,11 @@ readinessProbe:
   periodSeconds: 10
 resources:
   limits:
-    cpu: "3.5"
-    memory: 2560Mi
+    cpu: "3500m"
+    memory: "2560Mi"
   requests:
-    cpu: 50m
-    memory: 128Mi
+    cpu: "50m"
+    memory: "128Mi"
 
 volumeMounts:
 - name: ml-cache

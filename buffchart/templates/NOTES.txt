@@ -1,16 +1,56 @@
-1. Get the application URL by running these commands:
-{{- if contains "NodePort" .Values.service.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "pichart.fullname" . }})
-  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo http://$NODE_IP:$NODE_PORT
-{{- else if contains "LoadBalancer" .Values.service.type }}
-     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "pichart.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "pichart.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:{{ .Values.service.port }}
-{{- else if contains "ClusterIP" .Values.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "pichart.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
-  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+{{ .Chart.Name }} deployed as {{ if .Values.stateful }}StatefulSet{{ else }}Deployment{{ end }}/{{ include "pichart.fullname" . }} in namespace {{ .Release.Namespace }}.
+Image: {{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}
+
+Watch it come up:
+  kubectl -n {{ .Release.Namespace }} rollout status {{ if .Values.stateful }}statefulset{{ else }}deployment{{ end }}/{{ include "pichart.fullname" . }} --timeout=120s
+
+Endpoints (cluster-internal DNS):
+{{- range .Values.service.ports }}
+  http://{{ include "pichart.fullname" $ }}.{{ $.Release.Namespace }}.svc:{{ .port }}{{ with .name }}  ({{ . }}){{ end }}
 {{- end }}
+
+Quick local access — port-forward (keep the terminal open, then connect to localhost):
+{{- range .Values.service.ports }}
+  kubectl -n {{ $.Release.Namespace }} port-forward svc/{{ include "pichart.fullname" $ }} {{ .port }}:{{ .port }}
+{{- end }}
+{{- range $k, $v := .Values.sidecars }}
+{{- $p := $v.params | default dict }}
+{{- with first ($p.ports | default list) }}
+  kubectl -n {{ $.Release.Namespace }} port-forward svc/{{ $k }} {{ .containerPort }}:{{ .containerPort }}   # {{ $k }}
+{{- end }}
+{{- end }}
+{{- with .Values.sidecars }}
+
+Sidecars (each has its own Service):
+{{- range $name, $sc := . }}
+  {{ $name }}: {{ $sc.image }}:{{ $sc.tag }}
+{{- end }}
+{{- end }}
+{{- $pvcs := list }}
+{{- range $x := .Values.volumes }}{{ if $x.persistentVolumeClaim }}{{ $pvcs = append $pvcs $x.persistentVolumeClaim.claimName }}{{ end }}{{ end }}
+{{- with $pvcs }}
+
+Storage {{ if $.Values.stateful }}(StatefulSet volumeClaimTemplates; PVC names get a -<ordinal> suffix):{{ else }}PVCs created:{{ end }}
+{{- range . }}
+  {{ . }}
+{{- end }}
+  kubectl -n {{ $.Release.Namespace }} get pvc -l app.kubernetes.io/instance={{ $.Release.Name }}
+{{- end }}
+{{- with .Values.certmanager.groupName }}
+
+TLS: Certificate {{ include "pichart.servingCertificate" $ }} requested via issuer {{ . }}
+  kubectl -n {{ $.Release.Namespace }} get certificate {{ include "pichart.servingCertificate" $ }}
+{{- end }}
+{{- if .Values.serviceMonitor.enabled }}
+
+Metrics: ServiceMonitor {{ include "pichart.fullname" . }} registered for Prometheus.
+{{- end }}
+
+Smoke test:
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }} --logs
+
+All resources of this release:
+  kubectl -n {{ .Release.Namespace }} get all,sa,cm,pvc,servicemonitor -l app.kubernetes.io/instance={{ .Release.Name }}
+
+Note: the ServiceAccount does not automount its token (serviceAccount.automount=false);
+if the workload ever needs the Kubernetes API, set it to true explicitly.

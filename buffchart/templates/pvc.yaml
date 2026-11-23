@@ -1,14 +1,17 @@
 {{- range $x := .Values.volumes }}
 {{- if and $x.persistentVolumeClaim (not $.Values.stateful) }}
 {{- $obj := include "pichart.findNameInArray" (dict "array" $.Values.persistentVolumeClaimData "keyword" $x.name) | fromYaml }}
+{{- if not $obj }}{{ fail (printf "no persistentVolumeClaimData entry for %q" $x.name) }}{{- end }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ $x.persistentVolumeClaim.claimName }}
   labels:
     {{- include "pichart.labelsNoVersion" $ | nindent 4 }}
+  {{- with $obj.annotations }}
   annotations:
-    {{- toYaml $obj.annotations | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   accessModes:
   - {{ $obj.accessmode | default "ReadWriteOnce"  }}

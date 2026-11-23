@@ -102,11 +102,11 @@ kube-state-metrics:
 
   resources:
     requests:
-      cpu: 10m
-      memory: 32Mi
+      cpu: "10m"
+      memory: "32Mi"
     limits:
-      cpu: 10m
-      memory: 64Mi
+      cpu: "10m"
+      memory: "64Mi"
 
 alertmanager:
   enabled: true 
@@ -156,11 +156,11 @@ alertmanager:
 
     resources:
       limits:
-        cpu: 100m
-        memory: 32Mi
+        cpu: "100m"
+        memory: "32Mi"
       requests:
-        cpu: 10m
-        memory: 32Mi
+        cpu: "10m"
+        memory: "32Mi"
 
 
 grafana:
@@ -267,11 +267,11 @@ grafana:
 
   resources:
     limits:
-      cpu: 500m
-      memory: 384Mi
+      cpu: "500m"
+      memory: "384Mi"
     requests:
-      cpu: 10m
-      memory: 128Mi
+      cpu: "10m"
+      memory: "128Mi"
 
 prometheusOperator:
   enabled: true
@@ -325,20 +325,20 @@ prometheusOperator:
 
   resources:
     limits:
-      cpu: 100m
-      memory: 64Mi
+      cpu: "100m"
+      memory: "64Mi"
     requests:
-      cpu: 10m
-      memory: 32Mi
+      cpu: "10m"
+      memory: "32Mi"
 
   prometheusConfigReloader:
     resources:
       limits:
-        cpu: 100m
-        memory: 32Mi
+        cpu: "100m"
+        memory: "32Mi"
       requests:
-        cpu: 10m
-        memory: 32Mi
+        cpu: "10m"
+        memory: "32Mi"
 
 prometheus:
   enabled: true
@@ -398,11 +398,11 @@ prometheus:
 
     resources:
       limits:
-        cpu: 500m
-        memory: 512Mi
+        cpu: "500m"
+        memory: "512Mi"
       requests:
-        cpu: 50m
-        memory: 256Mi
+        cpu: "50m"
+        memory: "256Mi"
 
     retention: 30d
     retentionSize: "50GiB"

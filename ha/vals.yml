@@ -31,11 +31,11 @@ readinessProbe:
   periodSeconds: 5
 resources:
   limits:
-    cpu: 500m
-    memory: 512Mi
+    cpu: "500m"
+    memory: "512Mi"
   requests:
-    cpu: 50m
-    memory: 384Mi
+    cpu: "50m"
+    memory: "384Mi"
 
 volumeMounts:
 - name: ha-data
@@ -70,22 +70,22 @@ persistentVolumeClaimData:
 terminationGracePeriodSeconds: 50
 
 securityContext:
-  privileged: true
-  allowPrivilegeEscalation: true
+  privileged: false
+  allowPrivilegeEscalation: false
   runAsNonRoot: false
   readOnlyRootFilesystem: false
   capabilities:
       drop:
       - ALL
-      add:
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_ADMIN
+      # add:
+      # - NET_ADMIN
+      # - NET_RAW
+      # - SYS_ADMIN
   
 podSecurityContext:
-  runAsUser: 0
-  runAsGroup: 0
-  fsGroup: 0
+  runAsUser: 50007
+  runAsGroup: 50007
+  fsGroup: 50007
 
 affinity:
   nodeAffinity:

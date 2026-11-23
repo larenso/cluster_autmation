@@ -1,0 +1,70 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: monitoring-ingress
+  namespace: monitoring
+  labels:
+    network-policy-set: 00-internal
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - prometheus
+          - alertmanager
+  ingress:
+    - fromEntities: ["ingress"]
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+            - port: "9093"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: monitoring-k8sapi
+  namespace: monitoring
+  labels:
+    network-policy-set: 00-internal
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - prometheus
+          - kube-state-metrics
+          - kube-prometheus-stack-prometheus-operator
+  egress:
+    - toEntities: ["host", "remote-node"]
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: prometheus-host-scrape
+  namespace: monitoring
+  labels:
+    network-policy-set: 00-internal
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  egress:
+    # live targets: kubelet/cAdvisor :10250, cilium-agent :9962,
+    # cilium-envoy :9964 (all host-networked -> host entity, not pod rules)
+    - toEntities: ["host", "remote-node"]
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
+            - port: "9962"
+              protocol: TCP
+            - port: "9964"
+              protocol: TCP

@@ -10,24 +10,31 @@ metadata:
     {{- include "pichart.labels" . | nindent 4 }}
 spec:
   {{- if .Values.stateful }}
+  {{- $pvcs := list }}
   {{- range $x := .Values.volumes }}
-  {{- if $x.persistentVolumeClaim }}
-  {{- $obj := include "pichart.findNameInArray" (dict "array" $.Values.persistentVolumeClaimData "keyword" $x.name) | fromYaml }}
+  {{- if $x.persistentVolumeClaim }}{{- $pvcs = append $pvcs $x }}{{- end }}
+  {{- end }}
+  {{- with $pvcs }}
   volumeClaimTemplates:
+    {{- range $x := . }}
+    {{- $obj := include "pichart.findNameInArray" (dict "array" $.Values.persistentVolumeClaimData "keyword" $x.name) | fromYaml }}
+    {{- if not $obj }}{{ fail (printf "no persistentVolumeClaimData entry for %q" $x.name) }}{{- end }}
   - metadata:
       name: {{ $x.persistentVolumeClaim.claimName }}
       labels:
         {{- include "pichart.labelsNoVersion" $ | nindent 8 }}
+      {{- with $obj.annotations }}
       annotations:
-        {{- toYaml $obj.annotations | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       accessModes:
-      - {{ $obj.accessmode | default "ReadWriteOnce"  }}
+      - {{ $obj.accessmode | default "ReadWriteOnce" }}
       storageClassName: local-path
       resources:
         requests:
           storage: {{ $obj.request | default "1Gi" }}
-  {{- end }}
+    {{- end }}
   {{- end }}
   {{- end }}
   {{- if hasKey .Values "revisionHistoryLimit" }}
@@ -36,12 +43,11 @@ spec:
   revisionHistoryLimit: 1
   {{- end }}
   {{- if .Values.rollingUpdate }}
-  {{- with .Values.rollingUpdate }}
-  strategy: 
+  strategy:
+    type: RollingUpdate
     rollingUpdate:
-      maxSurge: {{ .maxSurge | default 1 }}
-      maxUnavailable: {{ .maxSurge | default 1 }}
-  {{- end }}
+      maxSurge: {{ dig "maxSurge" 1 .Values.rollingUpdate }}
+      maxUnavailable: {{ dig "maxUnavailable" 1 .Values.rollingUpdate }}
   {{- else if not .Values.stateful }}
   strategy: 
     type: Recreate
@@ -73,6 +79,7 @@ spec:
       imagePullSecrets: {{- toYaml . | nindent 6 }}
       {{- end }}
       serviceAccountName: {{ include "pichart.serviceAccountName" . }}
+      automountServiceAccountToken: {{ (.Values.serviceAccount).automount | default false }}
       {{- with .Values.podSecurityContext }}
       securityContext: 
         {{- toYaml . | nindent 8 }}
@@ -93,11 +100,15 @@ spec:
         securityContext: 
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        image: "{{ required "image.repository is required" .Values.image.repository }}:{{ required "image.tag is required (set image.tag or chart appVersion)" (default .Chart.AppVersion .Values.image.tag) }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         {{- range $i := .Values.service.ports }}
-        - containerPort: {{ $i.targetPort | default $i.port }}
+        {{- $tp := $i.targetPort }}
+        - containerPort: {{ or ($tp | int) $i.port | required "service.ports entries need a numeric port (or numeric targetPort)" }}
+          {{- if and $tp (not ($tp | int)) }}
+          name: {{ $tp }}
+          {{- end }}
         {{- end }}
         {{- with .Values.env }}
         env: 
@@ -129,9 +140,9 @@ spec:
         {{- end }}
       {{- range $k, $v := .Values.sidecars }}
       - name: {{ $k }}
-        image: {{ $v.image }}:{{ $v.tag }}
+        image: "{{ required (printf "sidecars.%s.image is required" $k) $v.image }}:{{ required (printf "sidecars.%s.tag is required" $k) $v.tag }}"
         {{- $map := dict "securityContext" $.Values.securityContext }}
-        {{- merge $v.params $map  | toYaml | nindent 8 }}
+        {{- merge (dict) ($v.params | default dict) $map  | toYaml | nindent 8 }}
       {{- end }}
       {{- with .Values.volumes }}
       volumes: 

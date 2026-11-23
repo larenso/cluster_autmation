@@ -1,0 +1,68 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+  namespace: kube-system
+  labels:
+    network-policy-set: 10-dns
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: coredns
+  namespace: kube-system
+  labels:
+    network-policy-set: 10-dns
+spec:
+  podSelector:
+    matchLabels:
+      k8s-app: kube-dns
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    # every pod in the cluster on port 53
+    - from:
+        - namespaceSelector: {}
+          podSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+        - protocol: TCP
+          port: 9153 # metrics
+  egress:
+    # forward . /etc/resolv.conf -> upstream resolvers (internet)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: local-path-provisioner
+  namespace: kube-system
+  labels:
+    network-policy-set: 10-dns
+spec:
+  podSelector:
+    matchLabels:
+      app: local-path-provisioner
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

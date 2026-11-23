@@ -7,7 +7,7 @@ approveSignerNames:
 - clusterissuers.cert-manager.io/*
 
 crds:
-  enabled: false
+  enabled: true
 
 startupapicheck:
   enabled: false
@@ -28,11 +28,11 @@ global:
 replicaCount: 1
 resources:
   limits:
-    cpu: 150m
-    memory: 64Mi
+    cpu: "150m"
+    memory: "64Mi"
   requests:
-    cpu: 10m
-    memory: 32Mi
+    cpu: "10m"
+    memory: "32Mi"
 
 extraArgs: 
 - --logging-format=json
@@ -50,11 +50,11 @@ webhook:
   replicaCount: 1
   resources:
     limits:
-      cpu: 100m
-      memory: 32Mi
+      cpu: "100m"
+      memory: "32Mi"
     requests:
-      cpu: 10m
-      memory: 32Mi
+      cpu: "10m"
+      memory: "32Mi"
 
   extraArgs:
   - --logging-format=json
@@ -79,11 +79,11 @@ cainjector:
   replicaCount: 1
   resources:
     limits:
-      cpu: 100m
-      memory: 64Mi
+      cpu: "100m"
+      memory: "64Mi"
     requests:
-      cpu: 10m
-      memory: 64Mi
+      cpu: "10m"
+      memory: "64Mi"
   
   extraArgs: 
   - --logging-format=json

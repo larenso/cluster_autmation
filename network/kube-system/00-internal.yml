@@ -1,0 +1,54 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: coredns-k8sapi
+  namespace: kube-system
+  labels:
+    network-policy-set: 00-internal
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s-app: kube-dns
+  egress:
+    - toEntities: ["host", "remote-node"]
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: local-path-provisioner-k8sapi
+  namespace: kube-system
+  labels:
+    network-policy-set: 00-internal
+spec:
+  endpointSelector:
+    matchLabels:
+      app: local-path-provisioner
+  egress:
+    - toEntities: ["host", "remote-node"]
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: helm-install-k8sapi
+  namespace: kube-system
+  labels:
+    network-policy-set: 00-internal
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: helmcharts.helm.cattle.io/chart
+        operator: Exists
+  egress:
+    - toEntities: ["host", "remote-node"]
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP

@@ -1,0 +1,42 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: apps-ingress
+  namespace: apps
+  labels:
+    network-policy-set: 00-world
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - ha
+          - immich
+  ingress:
+    - fromEntities: ["ingress"]
+      toPorts:
+        - ports:
+            - port: "8123"
+              protocol: TCP
+            - port: "2283"
+              protocol: TCP
+---
+# ha -> zigbee socket bridge (socat on the node)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ha-egress-host-bridge
+  namespace: apps
+  labels:
+    network-policy-set: 00-world
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: ha
+  egress:
+    - toEntities: ["host", "remote-node"]
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP

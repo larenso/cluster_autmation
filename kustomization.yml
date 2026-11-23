@@ -5,12 +5,8 @@ metadata:
   name: bootstrup
 
 resources:
-# crds
-- crds/gateway-api-1.6.1.yml
-- crds/cert-manager.yml
-
 - k3s/namespaces.yml
-# secrets
+- network
 - cert-manager/secret.yml
 - monitoring/secret.yml
 - immich/secret.yml

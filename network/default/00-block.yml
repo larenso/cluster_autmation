@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: no-workloads
+  namespace: default
+  labels:
+    network-policy-set: 00-block
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: no-workloads
+  namespace: kube-public
+  labels:
+    network-policy-set: 00-block
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: no-workloads
+  namespace: kube-node-lease
+  labels:
+    network-policy-set: 00-block
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
